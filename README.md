@@ -69,7 +69,7 @@ Package('packagename',
     {
       myPublicVariable : 'something',
         
-      OzMobileApplication : function()
+      MainClass : function()
       {
         this._super();
         console.log('I\'m MainClass\'s constructor');
