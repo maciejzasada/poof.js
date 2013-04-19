@@ -17,6 +17,8 @@
 
         Poof.Class('App', {type: Poof.Class.PUBLIC/*, extend: 'BaseClass'*/}, {
 
+            CONSTANT: 'you won\'t change me!',
+
             age: 23,
 
             App: function () {

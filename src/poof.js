@@ -8,7 +8,6 @@
         Package,
         Import,
         Class,
-        ClassDefinition,
         Utils;
 
     /*
@@ -197,7 +196,59 @@
 
                     }
 
-                }
+                },
+
+                transcribers: [
+
+                /**
+                 * Constant transcriber
+                 * Transcribes constants.
+                 */
+                    {
+                        test: function(name, scope, definition) {
+
+                            return name.toUpperCase() === name;
+
+                        },
+
+                        transcribe: function(name, scope, definition) {
+
+                            var value = definition[name];
+
+                            scope.__defineGetter__(name, function () {
+
+                                return value;
+
+                            });
+
+                            scope.__defineSetter__(name, function (value) {
+
+                                throw 'Illegal attempt to alter constant variable \'' + name + '\'';
+
+                            });
+
+                        }
+                    },
+
+                /**
+                 * Default transcriber
+                 * Transcribes whatever is left.
+                 */
+                    {
+                        test: function(name, scope, definition) {
+
+                            return true;
+
+                        },
+
+                        transcribe: function(name, scope, definition) {
+
+                            scope[name] = definition[name];
+
+                        }
+                    }
+
+                ]
 
             }
 
@@ -443,9 +494,22 @@
 
             };
 
-            transcribeMember = function (memberName) {
+            transcribeMember = function (memberName, scope) {
 
-                return definition[memberName];
+                var i;
+
+                for (i = 0; i < poofPriv.classes.transcribers.length; ++i) {
+
+                    if (poofPriv.classes.transcribers[i].test(memberName, scope, definition)) {
+
+                        poofPriv.classes.transcribers[i].transcribe(memberName, scope, definition);
+                        return;
+
+                    }
+
+                }
+
+                throw 'Transcriber not found for member \'' + memberName + '\' on class ' + name;
 
             };
 
@@ -460,7 +524,7 @@
 
                     if (shouldTranscribeMember(memberName)) {
 
-                        getScopeForMember(memberName)[memberName] = transcribeMember(memberName);
+                        transcribeMember(memberName, getScopeForMember(memberName));
 
                     }
 
