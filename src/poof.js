@@ -1,6 +1,6 @@
 (function (window) {
 
-    'use strict';
+//    'use strict';
     var poofConfig,
         poofPriv,
         Object,
@@ -175,6 +175,7 @@
             classes: {
 
                 expectedName: null,
+                beingDefined: false,
 
                 register: function (name, classObject) {
 
@@ -201,11 +202,101 @@
                 transcribers: [
 
                 /**
+                 * Function transcriber
+                 * Transcribes functions adding a __class__ property to them which allows determining scope later.
+                 */
+                    {
+                        test: function (name, scope, definition, constructor) {
+
+                            return typeof definition[name] === 'function';
+
+                        },
+
+                        transcribe: function (name, scope, definition, constructor) {
+
+                            scope[name] = definition[name];
+                            scope[name].__class__ = constructor;
+
+                        }
+                    },
+
+                /**
+                 * Private and protected transcriber
+                 * Transcribes private and protected members.
+                 */
+                    {
+                        test: function (name, scope, definition, constructor) {
+
+                            return name.match(/^_[_]?[a-zA-Z]+/) != null;
+
+                        },
+
+                        transcribe: function (name, scope, definition, constructor) {
+
+                            var isPrivate = name.charAt(1) === '_'; // TODO: implement protected methods
+
+                            var generateGetter = function (value) {
+
+                                return function getter () {
+
+                                    if (getter.caller.__class__ === constructor || poofPriv.classes.beingDefined) {
+
+                                        return value;
+
+                                    } else {
+
+                                        throw new Error('Illegal attempt to access ' + (isPrivate ? 'private' : 'protected') + ' member \'' + name + '\'');
+
+                                    }
+
+                                };
+
+                            };
+
+                            function setter (value) {
+
+                                if (setter.caller.__class__ === constructor || poofPriv.classes.beingDefined) {
+
+                                    scope.__defineGetter__(name, generateGetter(value));
+
+                                } else {
+
+                                    throw new Error('Illegal attempt to access private member \'' + name + '\'');
+
+                                }
+
+                            };
+
+                            scope.__defineGetter__(name, generateGetter(definition[name]));
+                            scope.__defineSetter__(name, setter);
+
+                        }
+                    },
+
+                /**
+                 * Default transcriber
+                 * Transcribes whatever is left.
+                 */
+                    {
+                        test: function (name, scope, definition, constructor) {
+
+                            return true;
+
+                        },
+
+                        transcribe: function(name, scope, definition, constructor) {
+
+                            scope[name] = definition[name];
+
+                        }
+                    },
+
+                /**
                  * Constant transcriber
                  * Transcribes constants.
                  */
                     {
-                        test: function(name, scope, definition) {
+                        test: function (name, scope, definition) {
 
                             return name.toUpperCase() === name;
 
@@ -223,27 +314,9 @@
 
                             scope.__defineSetter__(name, function (value) {
 
-                                throw 'Illegal attempt to alter constant variable \'' + name + '\'';
+                                throw new Error('Illegal attempt to alter constant variable \'' + name + '\'');
 
                             });
-
-                        }
-                    },
-
-                /**
-                 * Default transcriber
-                 * Transcribes whatever is left.
-                 */
-                    {
-                        test: function(name, scope, definition) {
-
-                            return true;
-
-                        },
-
-                        transcribe: function(name, scope, definition) {
-
-                            scope[name] = definition[name];
 
                         }
                     }
@@ -500,16 +573,13 @@
 
                 for (i = 0; i < poofPriv.classes.transcribers.length; ++i) {
 
-                    if (poofPriv.classes.transcribers[i].test(memberName, scope, definition)) {
+                    if (poofPriv.classes.transcribers[i].test(memberName, scope, definition, constructor)) {
 
-                        poofPriv.classes.transcribers[i].transcribe(memberName, scope, definition);
-                        return;
+                        poofPriv.classes.transcribers[i].transcribe(memberName, scope, definition, constructor);
 
                     }
 
                 }
-
-                throw 'Transcriber not found for member \'' + memberName + '\' on class ' + name;
 
             };
 
@@ -519,6 +589,7 @@
                     memberName;
 
                 constructor.prototype = new baseClass();
+                constructor.prototype.constructor = constructor;
 
                 for (memberName in definition) {
 
@@ -544,9 +615,11 @@
             poofPriv.classes.expectedName = null;
 
             this.name = name;
+            poofPriv.classes.beingDefined = true;
             define(definition);
             setType(options.type);
             extend(options.extend);
+            poofPriv.classes.beingDefined = false;
 
         } else {
 

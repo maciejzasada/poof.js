@@ -1,6 +1,6 @@
 (function (window, document) {
 
-    'use strict';
+//    'use strict';
 
     Poof.configure({
 
@@ -27,10 +27,31 @@
 
             },
 
-            test: function() {
+            __privateVariable: 'I know you are an instance of App!',
 
-                console.log('Hey man! I\'m ' + this.age + ' years old.');
-                return this.age;
+            __privateFunction: function () {
+
+                console.log('I am a private function');
+                console.log('I can access public variables:', this.age);
+                console.log('I can access private variables:', this.__privateVariable);
+
+            },
+
+            test: function () {
+
+                console.log('the private var says:', this.__privateVariable);
+
+            },
+
+            test2: function () {
+
+                this.__privateFunction();
+
+            },
+
+            modPrivate: function () {
+
+                this.__privateVariable = 'new value';
 
             }
 
