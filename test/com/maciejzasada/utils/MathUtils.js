@@ -2,9 +2,9 @@
 
     'use strict';
 
-    Poof.Package('com.maciejzasada.utils', [
+    Package('com.maciejzasada.utils', [
 
-        Poof.Class('MathUtils', {type: Poof.Class.SINGLETON}, {
+        Class('MathUtils', {type: Class.SINGLETON}, {
 
         })
 

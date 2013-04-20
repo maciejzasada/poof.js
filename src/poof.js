@@ -8,6 +8,7 @@
         Package,
         Import,
         Class,
+        ClassDefinition,
         Utils;
 
     /*
@@ -122,7 +123,7 @@
      */
     Poof = function () {
 
-        var config, priv;
+        var config, priv, exportClasses;
 
         config = {
 
@@ -133,6 +134,15 @@
         };
 
         priv = {
+
+            exportClasses: function (scope) {
+
+                scope.Object = Object;
+                scope.Package = Package;
+                scope.Import = Import;
+                scope.Class = Class;
+
+            },
 
             packages: {
 
@@ -331,6 +341,7 @@
 
             config = Utils.extend(config, options);
             poofConfig = config;
+            poofPriv.exportClasses(poofConfig.scope);
 
         };
 
@@ -390,7 +401,7 @@
      */
     Package = function (name, contents) {
 
-        var define, init, analyseComponents, importDependencies, importNextDependency, onDependencyImportComplete, register, initClasses, imports = [], classes = [], currentDependencyImportIndex = -1, eventDispatcher = new Object(), initObject, packageObject;
+        var define, init, analyseComponents, importDependencies, importNextDependency, onDependencyImportComplete, register, initClasses, imports = [], classDefinitions = [], currentDependencyImportIndex = -1, eventDispatcher = new Object(), initObject, packageObject;
 
         if (poofPriv.packages.expectedName && name !== poofPriv.packages.expectedName) {
 
@@ -401,7 +412,7 @@
         define = function () {
 
             poofPriv.packages.expectedName = null;
-            initObject = {name: name, classes: classes, initialiser: init};
+            initObject = {name: name, classes: classDefinitions, initialiser: init};
             poofPriv.packages.addToInitialisationQueue(initObject);
             poofPriv.packages.tryInitialisingNext();
 
@@ -431,8 +442,8 @@
                         imports.push(contents[i]);
                         break;
 
-                    case Class.prototype:
-                        classes.push(contents[i]);
+                    case ClassDefinition.prototype:
+                        classDefinitions.push(contents[i]);
                         break;
 
                 }
@@ -501,14 +512,16 @@
 
         initClasses = function () {
 
-            var i;
-            console.log(name, classes[0].name, 'all dependencies imported, initialising classes');
-            for(i = 0; i < classes.length; ++i) {
+            var i, classObject;
+            console.log(name, classDefinitions[0].name, 'all dependencies imported, initialising classes');
+            for(i = 0; i < classDefinitions.length; ++i) {
 
-                packageObject[classes[i].name] = classes[i].constructor;
-                poofPriv.classes.register(classes[i].name, packageObject[classes[i].name]);
+                classObject = new Class(classDefinitions[i].name, classDefinitions[i].options, classDefinitions[i].definition);
+                packageObject[classObject.name] = classObject.constructor;
+                poofPriv.classes.register(classObject.name, packageObject[classObject.name]);
 
             }
+
             poofPriv.packages.onInitialised(initObject);
 
         };
@@ -534,6 +547,25 @@
 
     }, {inPlace: true});
     Package.prototype.constructor = Package;
+
+    /*
+     Class Definition class
+     */
+    ClassDefinition = function (name, options, definition) {
+
+        if (poofPriv.classes.expectedName && poofPriv.classes.expectedName !== name) {
+
+            throw new Error('Invalid class name ' + name + '. Expected ' + poofPriv.classes.expectedName + '.');
+
+        }
+
+        this.name = name;
+        this.options = options;
+        this.definition = definition;
+
+        poofPriv.classes.expectedName = null;
+
+    };
 
     /*
      Class class
@@ -606,14 +638,6 @@
             /* constructor */
             Object.call(this);
 
-            if (poofPriv.classes.expectedName && poofPriv.classes.expectedName !== name) {
-
-                throw ('Invalid class name ' + name + '. Expected ' + poofPriv.classes.expectedName + '.');
-
-            }
-
-            poofPriv.classes.expectedName = null;
-
             this.name = name;
             poofPriv.classes.beingDefined = true;
             define(definition);
@@ -625,7 +649,7 @@
 
             /* function call */
             console.log('\t\t[C] defining class', name);
-            return new Class(name, options, definition);
+            return new ClassDefinition(name, options, definition);
 
         }
 
@@ -837,11 +861,8 @@
     Import.EVENT_COMPLETE = 'complete';
 
     /* Exports */
-    Poof.prototype.Object = Object;
-    Poof.prototype.Package = Package;
-    Poof.prototype.Import = Import;
-    Poof.prototype.Class = Class;
     window.Poof = new Poof();
+    poofPriv.exportClasses(Poof.prototype);
 
     /* Minification enabler and shortcuts */
     Utils = window.Poof.Utils;

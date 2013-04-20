@@ -2,11 +2,25 @@
 
     'use strict';
 
-    Poof.Package('com.maciejzasada', [
+    Package('com.maciejzasada', [
 
-        Poof.Import('com.maciejzasada.utils.MathUtils'),
+        Import('com.maciejzasada.utils.MathUtils'),
 
-        Poof.Class('BaseClass', {type: Poof.Class.ABSTRACT}, {
+        Class('BaseClass', {type: Class.ABSTRACT}, {
+
+            baseVar: 'I belong to BaseClass',
+
+            BaseClass: function () {
+
+                console.log('I am BaseClass constructor');
+
+            },
+
+            baseMethod: function () {
+
+                console.log('I am some base class method');
+
+            }
 
         })
 

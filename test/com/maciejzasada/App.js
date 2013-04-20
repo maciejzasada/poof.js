@@ -10,12 +10,12 @@
 
     });
 
-    Poof.Package('com.maciejzasada', [
+    Package('com.maciejzasada', [
 
-        Poof.Import('com.maciejzasada.BaseClass'),
-        Poof.Import('com.maciejzasada.utils.UtilsClass'),
+        Import('com.maciejzasada.IntermediateClass'),
+        Import('com.maciejzasada.utils.UtilsClass'),
 
-        Poof.Class('App', {type: Poof.Class.PUBLIC/*, extend: 'BaseClass'*/}, {
+        Class('App', {type: Class.PUBLIC, extend: 'IntermediateClass'}, {
 
             CONSTANT: 'you won\'t change me!',
 
