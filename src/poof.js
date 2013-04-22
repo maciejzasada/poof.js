@@ -1,3 +1,8 @@
+/**
+ * @author Maciej Zasada maciejzsd@gmail.com
+ * poof.js - Programmer's Object Oriented Framework
+ */
+
 (function (window) {
 
 //    'use strict';
@@ -209,6 +214,18 @@
 
                 },
 
+                initMain: function () {
+
+                    var MainClass = Class.getByName(poofConfig.main);
+
+                    if(MainClass) {
+
+                        poofConfig.scope['main'] = new MainClass();
+
+                    }
+
+                },
+
                 transcribers: [
 
                 /**
@@ -342,6 +359,16 @@
             config = Utils.extend(config, options);
             poofConfig = config;
             poofPriv.exportClasses(poofConfig.scope);
+
+            if(poofConfig.main) {
+
+                window.Poof.on('packageReady_' + poofConfig.main, function () {
+
+                    poofPriv.classes.initMain();
+
+                });
+
+            }
 
         };
 

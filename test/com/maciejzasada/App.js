@@ -6,7 +6,8 @@
 
         scope: window,
         root: '/test/',
-        extension: '.js'
+        extension: '.js',
+        main: 'com.maciejzasada.App'
 
     });
 
