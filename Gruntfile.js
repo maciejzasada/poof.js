@@ -136,7 +136,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: 'build',
                         src: ['poof-' + VERSION_STRING + '.js'],
-                        dest: 'test/vendor',
+                        dest: 'build',
                         rename: function(dest, src) {
                             return dest + '/poof.js';
                         }
@@ -154,6 +154,12 @@ module.exports = function (grunt) {
                 stdout: true,
                 stderr: true
             }
+
+        },
+
+        qunit: {
+
+            all: ['test/index.html']
 
         },
 
@@ -186,8 +192,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-exec');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-qunit');
 
     grunt.registerTask('debug', ['clean', 'jslint', 'concat:js', 'copy:js']);
     grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number']);
+    grunt.registerTask('test', ['qunit']);
 
 };

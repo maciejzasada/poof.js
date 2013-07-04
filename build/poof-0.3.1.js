@@ -3,7 +3,7 @@
  * @author Maciej Zasada maciejzsd@gmail.com
  * @copyright 2013 Maciej Zasada
  * @version 0.3.1
- * @date 2013/07/04 02:37:10
+ * @date 2013/07/04 12:19:18
  */
 
 /* ---------- Source: src/PoofObject.js ---------- */

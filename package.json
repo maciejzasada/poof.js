@@ -1,28 +1,35 @@
 {
-    "author": "maciej",
-    "name": "poof.js",
-    "repository" : {
-        "type" : "git",
-        "url" : "https://github.com/maciejzasada/poof.js.git"
-    },
-    "version": "0.3.0",
-    "engines": {
-        "node": ">= 0.10.4"
-    },
-    "dependencies": {
-        "grunt": "*",
-        "grunt-contrib": "*",
-        "grunt-contrib-clean": "*",
-        "grunt-contrib-concat": "*",
-        "grunt-contrib-uglify": "*",
-        "grunt-contrib-copy": "*",
-        "grunt-contrib-watch": "*",
-        "grunt-contrib-jshint": "*",
-        "grunt-jslint": "*",
-        "grunt-exec": "*",
-        "connect": "*"
-    },
-    "devDependencies": {
-        "grunt": "*"
-    }
+  "author": "maciej",
+  "name": "poof.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maciejzasada/poof.js.git"
+  },
+  "version": "0.3.0",
+  "engines": {
+    "node": ">= 0.10.4"
+  },
+  "dependencies": {
+    "grunt": "*",
+    "grunt-contrib": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-jslint": "*",
+    "grunt-exec": "*",
+    "connect": "*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "qunit": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-qunit": "~0.2.2",
+    "qunitjs": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
 }
