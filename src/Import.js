@@ -5,8 +5,29 @@
  * Time: 12:34 AM
  */
 
-var Import = function () {
+
+var Import,
+    ImportUtils;
+
+
+ImportUtils = {
+
+    queuedImports: [],
+
+    httpGet: function (url, successHandler, failureHandler) {
+        console.log('httpGet', url);
+    }
 
 };
 
-Import.prototype = new PoofObject();
+
+Import = function (path) {
+    ImportUtils.httpGet(path);
+};
+
+
+/**
+ * Exports
+ * @type {Function}
+ */
+window.Import = Import;

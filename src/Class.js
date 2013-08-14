@@ -5,8 +5,17 @@
  * Time: 12:34 AM
  */
 
+/**
+ * Defines new class
+ * @constructor
+ */
 var Class = function () {
 
 };
 
-Class.prototype = new PoofObject();
+
+/**
+ * Exports
+ * @type {Function}
+ */
+window.Class = Class;

@@ -4,7 +4,7 @@ poof.js
 ### JavaScript Programmer's Object Oriented Framework. ###
 
 ### Version info ###
-Current version: 0.2.0 (Beta)
+Current version: 0.3.0 (RC)
 Release date: 2013/??/??
 Version authors: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  
 Original author: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  

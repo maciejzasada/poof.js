@@ -5,23 +5,23 @@
  */
 
 module.exports = function (grunt) {
+    'use strict';
 
     var NAME = 'poof.js',
         VERSION = 0,
-        REVISION = 3,
-        BUILD = 1,
+        REVISION = 4,
+        BUILD = 4,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
         AUTHOR = 'Maciej Zasada maciejzsd@gmail.com',
         COPYRIGHT = '2013 Maciej Zasada',
 
-        $jsLibs = [
-        ],
-
         $jsClasses = [
             'src/PoofObject.js',
             'src/Poof.js',
-            'src/Package.js',
             'src/Class.js',
+            'src/AbstractClass.js',
+            'src/SingletonClass.js',
+            'src/Interface.js',
             'src/Import.js'
 
         ],
@@ -44,10 +44,6 @@ module.exports = function (grunt) {
 
             files: [
                 'src/**/*.js'
-            ],
-
-            exclude: [
-                'lib/**/*.js'
             ],
 
             options: {
@@ -103,7 +99,7 @@ module.exports = function (grunt) {
 
             js: {
 
-                src: $jsLibs.concat($jsClasses),
+                src: $jsClasses,
                 dest: 'build/poof-' + VERSION_STRING + '.js'
 
             }
@@ -114,9 +110,7 @@ module.exports = function (grunt) {
         uglify: {
 
             options: {
-                mangle: {
-                    except: ['jQuery']
-                }
+                wrap: true
             },
 
             main: {
@@ -157,19 +151,37 @@ module.exports = function (grunt) {
 
         },
 
+        notify: {
+
+            debug: {
+                options: {
+                    title: 'Build Complete [DEBUG]',
+                    message: 'Poof.js debug build completed successfully'
+                }
+            },
+
+            release: {
+                options: {
+                    title: 'Build Complete [RELEASE]',
+                    message: 'Poof.js release build completed successfully'
+                }
+            }
+
+        },
+
         watch: {
 
             grunt: {
 
                 files: ['Gruntfile.js'],
-                tasks: ['jshint:gruntfile']
+                tasks: ['debug']
 
             },
 
             js: {
 
                 files: ['src/**/*.js'],
-                tasks: ['clean', 'jslint', 'concat:js', 'copy:js']
+                tasks: ['debug']
 
             }
 
@@ -185,9 +197,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-exec');
+    grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('debug', ['clean', 'jslint', 'concat:js', 'copy:js']);
-    grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number']);
+    grunt.registerTask('debug', ['jshint', 'clean', 'jslint', 'concat:js', 'copy:js', 'notify:debug']);
+    grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number', 'notify:release']);
+    grunt.registerTask('default', ['debug']);
 
 };
