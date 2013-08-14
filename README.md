@@ -1,6 +1,8 @@
 poof.js
 =======
 
+[![Build Status](https://travis-ci.org/maciejzasada/poof.js.png?branch=m4)](https://travis-ci.org/maciejzasada/poof.js)
+
 ### JavaScript Programmer's Object Oriented Framework. ###
 
 ### Version info ###
