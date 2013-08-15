@@ -64,7 +64,8 @@ Poof.__defineGetter__('VERSION_STRING', function () {
  */
 CONFIG = {
     MAIN_CLASS_ATTRIBUTE_NAME: 'main',
-    CLASS_EXTENSION: '.poof'
+    CLASS_EXTENSION: '.poof.js',
+    ROOT: ''
 };
 
 
@@ -93,13 +94,36 @@ domReady = function (callback) {
  */
 initApp = function () {
     var scripts = document.getElementsByTagName('script'),
-        i;
+        i,
+        mainPath,
+        Main;
 
+    // Iterate over included scripts to find the main poof.js script.
     for (i = 0; i < scripts.length; ++i) {
-        if (scripts[i].hasAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME) && scripts[i].getAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME).match(CONFIG.CLASS_EXTENSION + '$')) {
-            Import(scripts[i].getAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME));
-            return true;
+
+        // Check if the script has an attribute specifying the main poof.js class.
+        if (scripts[i].hasAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME)) {
+
+            // Get the attribute value which is the path to the main class.
+            mainPath = scripts[i].getAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME);
+
+            // Check if the file specified as a main class has appropriate extension.
+            if (mainPath.match(CONFIG.CLASS_EXTENSION + '$')) {
+
+                // Resolve root package URL.
+                CONFIG.ROOT = mainPath.indexOf('/') === -1 ? '' : mainPath.substring(0, mainPath.lastIndexOf('/') + 1);
+
+                // Initialise the main class (it is reference-less).
+                Main = Import(mainPath, function () {
+                    new Main();
+                });
+
+                return true;
+
+            }
+
         }
+
     }
 
     return false;

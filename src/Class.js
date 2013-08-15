@@ -5,6 +5,7 @@
  * Time: 12:34 AM
  */
 
+
 /**
  * Defines new class
  * @constructor

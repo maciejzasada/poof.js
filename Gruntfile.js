@@ -42,29 +42,36 @@ module.exports = function (grunt) {
 
         jslint: {
 
-            files: [
-                'src/**/*.js'
-            ],
+            main: {
 
-            options: {
-                junit: 'log/junit.xml',
-                log: 'log/lint.log',
-                jslintXml: 'log/jslint_xml.xml',
-                errorsOnly: false,
-                failOnError: false,
-                shebang: true,
-                checkstyle: 'log/checkstyle.xml'
-            },
+                options: {
+                    junit: 'log/junit.xml',
+                    log: 'log/lint.log',
+                    jslintXml: 'log/jslint_xml.xml',
+                    errorsOnly: false,
+                    failOnError: false,
+                    shebang: true,
+                    checkstyle: 'log/checkstyle.xml'
+                },
 
-            directives: {
+                directives: {
 
-                bitwise: true,
-                browser: true,
-                debug: false,
-                node: false,
-                plusplus: true,
-                predef: $jsGlobals.concat([
-                ])
+                    bitwise: true,
+                    browser: true,
+                    debug: false,
+                    node: false,
+                    nomen: true,
+                    plusplus: true,
+                    sloppy: true,
+                    predef: $jsGlobals.concat([
+                        'console'
+                    ])
+                },
+
+                src: ['src/**/*.js'],
+
+                exclude: ['src/_poof.js']
+
             }
 
         },
