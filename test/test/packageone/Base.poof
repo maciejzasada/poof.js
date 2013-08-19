@@ -1,0 +1,52 @@
+/**
+ * @author magic
+ * @copyright 2013 magic
+ * Date: 8/19/13
+ * Time: 1:35 AM
+ */
+
+/*global import$, class$, abstract$, final$, singleton$ */
+
+(function () {
+    'use strict';
+
+    class$('Base', {extend$: null, implement$: []}, {
+
+        static$: {
+
+            public$: {
+            },
+
+            protected$: {
+            },
+
+            private$: {
+            }
+
+        },
+
+        instance$: {
+
+            public$: {
+
+                /**
+                 * Base constructor
+                 * @constructor
+                 */
+                Base: function () {
+                    return;
+                }
+
+            },
+
+            protected$: {
+            },
+
+            private$: {
+            }
+
+        }
+
+    });
+
+}());

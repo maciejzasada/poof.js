@@ -10,7 +10,7 @@
  * Defines new class
  * @constructor
  */
-var Class = function () {
+var class$ = function () {
 
 };
 
@@ -19,4 +19,4 @@ var Class = function () {
  * Exports
  * @type {Function}
  */
-window.Class = Class;
+window.class$ = class$;

@@ -124,7 +124,7 @@
     };
 
     /*
-     Poof class
+     poof class
      */
     Poof = function () {
 
@@ -181,7 +181,7 @@
                 onInitialised: function (initObject) {
 
                     poofPriv.packages.initialisationQueue.splice(poofPriv.packages.initialisationQueue.indexOf(initObject), 1);
-                    window.Poof.dispatch('packageReady_' + initObject.name + '.' + initObject.classes[0].name);
+                    window.poof.dispatch('packageReady_' + initObject.name + '.' + initObject.classes[0].name);
 
                 }
 
@@ -362,7 +362,7 @@
 
             if(poofConfig.main) {
 
-                window.Poof.on('packageReady_' + poofConfig.main, function () {
+                window.poof.on('packageReady_' + poofConfig.main, function () {
 
                     poofPriv.classes.initMain();
 
@@ -857,7 +857,7 @@
                 poofPriv.packages.expectedName = self.packageName;
                 poofPriv.classes.expectedName = self.className;
 
-                window.Poof.one('packageReady_' + self.packageName + '.' + self.className, function () {
+                window.poof.one('packageReady_' + self.packageName + '.' + self.className, function () {
 
                     self.dispatch(Import.EVENT_COMPLETE);
 
@@ -888,10 +888,10 @@
     Import.EVENT_COMPLETE = 'complete';
 
     /* Exports */
-    window.Poof = new Poof();
+    window.poof = new poof();
     poofPriv.exportClasses(Poof.prototype);
 
     /* Minification enabler and shortcuts */
-    Utils = window.Poof.Utils;
+    Utils = window.poof.Utils;
 
 }(window));

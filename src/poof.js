@@ -7,27 +7,27 @@
 
 
 /**
- * Poof object
+ * poof object
  * @type {{}}
  */
-var Poof,
+var poof,
     CONFIG,
     domReady,
     initApp;
 
 
 /**
- * Poof object
+ * poof object
  * @type {{}}
  */
-Poof = {};
+poof = {};
 
 
 /**
  * Version number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('VERSION', function () {
+poof.__defineGetter__('VERSION', function () {
     return parseInt('{{VERSION}}', 10);
 });
 
@@ -36,7 +36,7 @@ Poof.__defineGetter__('VERSION', function () {
  * Revision number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('REVISION', function () {
+poof.__defineGetter__('REVISION', function () {
     return parseInt('{{REVISION}}', 10);
 });
 
@@ -45,7 +45,7 @@ Poof.__defineGetter__('REVISION', function () {
  * Build number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('BUILD', function () {
+poof.__defineGetter__('BUILD', function () {
     return parseInt('{{BUILD}}', 10);
 });
 
@@ -53,18 +53,18 @@ Poof.__defineGetter__('BUILD', function () {
 /**
  * Version string
  */
-Poof.__defineGetter__('VERSION_STRING', function () {
-    return Poof.VERSION + '.' + Poof.REVISION + '.' + Poof.BUILD;
+poof.__defineGetter__('VERSION_STRING', function () {
+    return poof.VERSION + '.' + poof.REVISION + '.' + poof.BUILD;
 });
 
 
 /**
- * Internal Poof configuration
+ * Internal poof configuration
  * @type {{}}
  */
 CONFIG = {
-    MAIN_CLASS_ATTRIBUTE_NAME: 'main',
-    CLASS_EXTENSION: '.poof.js',
+    MAIN_CLASS_ATTRIBUTE_NAME: 'data-main',
+    CLASS_EXTENSION: '.poof',
     ROOT: ''
 };
 
@@ -114,7 +114,7 @@ initApp = function () {
                 CONFIG.ROOT = mainPath.indexOf('/') === -1 ? '' : mainPath.substring(0, mainPath.lastIndexOf('/') + 1);
 
                 // Initialise the main class (it is reference-less).
-                Main = Import(mainPath, function () {
+                Main = import$(mainPath, function () {
                     new Main();
                 });
 
@@ -135,7 +135,7 @@ initApp = function () {
  */
 domReady(function () {
     if (!initApp()) {
-        console.warn('Poof.js main class not found');
+        console.warn('poof.js main class not found');
     }
 });
 
@@ -144,4 +144,4 @@ domReady(function () {
  * Exports
  * @type {{}}
  */
-window.Poof = Poof;
+window.poof = poof;

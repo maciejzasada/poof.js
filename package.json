@@ -18,7 +18,7 @@
         "grunt-contrib-copy": "*",
         "grunt-contrib-watch": "*",
         "grunt-contrib-jshint": "*",
-        "grunt-jslint": "*",
+        "grunt-jslint": "1.x",
         "grunt-exec": "*",
         "grunt-notify": "*",
         "connect": "*"

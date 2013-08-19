@@ -10,26 +10,26 @@ module.exports = function (grunt) {
     var NAME = 'poof.js',
         VERSION = 0,
         REVISION = 4,
-        BUILD = 4,
+        BUILD = 0,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
         AUTHOR = 'Maciej Zasada maciejzsd@gmail.com',
         COPYRIGHT = '2013 Maciej Zasada',
 
         $jsClasses = [
-            'src/PoofObject.js',
-            'src/Poof.js',
-            'src/Class.js',
-            'src/AbstractClass.js',
-            'src/SingletonClass.js',
-            'src/Interface.js',
-            'src/Import.js'
+            'src/poof.js',
+            'src/class.js',
+            'src/abstract.js',
+            'src/final.js',
+            'src/singleton.js',
+            'src/interface.js',
+            'src/import.js'
 
         ],
 
         $jsGlobals = [];
 
     $jsClasses.forEach(function (url) {
-        $jsGlobals.push(url.substring(url.lastIndexOf('/') + 1, url.indexOf('.js')));
+        $jsGlobals.push(url.substring(url.lastIndexOf('/') + 1, url.indexOf('.js')) + '$');
     });
 
     grunt.initConfig({
@@ -163,14 +163,14 @@ module.exports = function (grunt) {
             debug: {
                 options: {
                     title: 'Build Complete [DEBUG]',
-                    message: 'Poof.js debug build completed successfully'
+                    message: 'poof.js debug build completed successfully'
                 }
             },
 
             release: {
                 options: {
                     title: 'Build Complete [RELEASE]',
-                    message: 'Poof.js release build completed successfully'
+                    message: 'poof.js release build completed successfully'
                 }
             }
 

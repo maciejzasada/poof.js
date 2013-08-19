@@ -2,29 +2,11 @@
  * poof.js
  * @author Maciej Zasada maciejzsd@gmail.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.4
- * @date 2013/08/16 00:53:20
+ * @version 0.4.0
+ * @date 2013/08/19 02:35:48
  */
 
-/* ---------- Source: src/PoofObject.js ---------- */
-
-/**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
- * Date: 7/4/13
- * Time: 12:33 AM
- */
-
-var PoofObject = function () {
-
-};
-
-PoofObject.prototype = {
-
-};
-
-
-/* ---------- Source: src/Poof.js ---------- */
+/* ---------- Source: src/poof.js ---------- */
 
 /**
  * @author Maciej Zasada maciej@unit9.com
@@ -35,27 +17,27 @@ PoofObject.prototype = {
 
 
 /**
- * Poof object
+ * poof object
  * @type {{}}
  */
-var Poof,
+var poof,
     CONFIG,
     domReady,
     initApp;
 
 
 /**
- * Poof object
+ * poof object
  * @type {{}}
  */
-Poof = {};
+poof = {};
 
 
 /**
  * Version number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('VERSION', function () {
+poof.__defineGetter__('VERSION', function () {
     return parseInt('0', 10);
 });
 
@@ -64,7 +46,7 @@ Poof.__defineGetter__('VERSION', function () {
  * Revision number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('REVISION', function () {
+poof.__defineGetter__('REVISION', function () {
     return parseInt('4', 10);
 });
 
@@ -73,26 +55,26 @@ Poof.__defineGetter__('REVISION', function () {
  * Build number,
  * replaced with actual value during build.
  */
-Poof.__defineGetter__('BUILD', function () {
-    return parseInt('4', 10);
+poof.__defineGetter__('BUILD', function () {
+    return parseInt('0', 10);
 });
 
 
 /**
  * Version string
  */
-Poof.__defineGetter__('VERSION_STRING', function () {
-    return Poof.VERSION + '.' + Poof.REVISION + '.' + Poof.BUILD;
+poof.__defineGetter__('VERSION_STRING', function () {
+    return poof.VERSION + '.' + poof.REVISION + '.' + poof.BUILD;
 });
 
 
 /**
- * Internal Poof configuration
+ * Internal poof configuration
  * @type {{}}
  */
 CONFIG = {
-    MAIN_CLASS_ATTRIBUTE_NAME: 'main',
-    CLASS_EXTENSION: '.poof.js',
+    MAIN_CLASS_ATTRIBUTE_NAME: 'data-main',
+    CLASS_EXTENSION: '.poof',
     ROOT: ''
 };
 
@@ -142,7 +124,7 @@ initApp = function () {
                 CONFIG.ROOT = mainPath.indexOf('/') === -1 ? '' : mainPath.substring(0, mainPath.lastIndexOf('/') + 1);
 
                 // Initialise the main class (it is reference-less).
-                Main = Import(mainPath, function () {
+                Main = import$(mainPath, function () {
                     new Main();
                 });
 
@@ -163,7 +145,7 @@ initApp = function () {
  */
 domReady(function () {
     if (!initApp()) {
-        console.warn('Poof.js main class not found');
+        console.warn('poof.js main class not found');
     }
 });
 
@@ -172,10 +154,10 @@ domReady(function () {
  * Exports
  * @type {{}}
  */
-window.Poof = Poof;
+window.poof = poof;
 
 
-/* ---------- Source: src/Class.js ---------- */
+/* ---------- Source: src/class.js ---------- */
 
 /**
  * @author Maciej Zasada maciej@unit9.com
@@ -189,7 +171,7 @@ window.Poof = Poof;
  * Defines new class
  * @constructor
  */
-var Class = function () {
+var class$ = function () {
 
 };
 
@@ -198,24 +180,10 @@ var Class = function () {
  * Exports
  * @type {Function}
  */
-window.Class = Class;
+window.class$ = class$;
 
 
-/* ---------- Source: src/AbstractClass.js ---------- */
-
-/**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
- * Date: 8/14/13
- * Time: 1:49 AM
- */
-
-var AbstractClass = function () {
-
-};
-
-
-/* ---------- Source: src/SingletonClass.js ---------- */
+/* ---------- Source: src/abstract.js ---------- */
 
 /**
  * @author Maciej Zasada maciej@unit9.com
@@ -224,12 +192,28 @@ var AbstractClass = function () {
  * Time: 1:49 AM
  */
 
-var SingletonClass = function () {
+var abstract$ = function () {
 
 };
 
+window.abstract$ = abstract$;
 
-/* ---------- Source: src/Interface.js ---------- */
+/* ---------- Source: src/final.js ---------- */
+
+/**
+ * @author Maciej Zasada maciej@unit9.com
+ * @copyright 2013 UNIT9 Ltd.
+ * Date: 8/19/13
+ * Time: 1:00 AM
+ */
+
+var final$ = function () {
+
+};
+
+window.final$ = final$;
+
+/* ---------- Source: src/singleton.js ---------- */
 
 /**
  * @author Maciej Zasada maciej@unit9.com
@@ -238,12 +222,35 @@ var SingletonClass = function () {
  * Time: 1:49 AM
  */
 
-var Interface = function () {
+var singleton$ = function () {
 
 };
 
+window.singleton$ = singleton$;
 
-/* ---------- Source: src/Import.js ---------- */
+/* ---------- Source: src/interface.js ---------- */
+
+/**
+ * @author Maciej Zasada maciej@unit9.com
+ * @copyright 2013 UNIT9 Ltd.
+ * Date: 8/14/13
+ * Time: 1:49 AM
+ */
+
+
+/**
+ * Defines new interface
+ * @param name interface name
+ * @param definition interface definition
+ * @constructor
+ */
+var interface$ = function (name, definition) {
+
+};
+
+window.interface$ = interface$;
+
+/* ---------- Source: src/import.js ---------- */
 
 /**
  * @author Maciej Zasada maciej@unit9.com
@@ -256,24 +263,83 @@ var Interface = function () {
 /**
  * Import
  */
-var Import,
-    ImportUtils;
+var import$,
+    importUtils;
 
 
 /**
  * Internal Import utility functions
  */
-ImportUtils = {
+importUtils = {
 
-    queue: [],
-    imported: [],
-    importTimeoutId: -1,
     resourcesByPath: {},
     constructorsByPath: {},
+    importTimeoutId: -1,
+    queue: [],
 
-    isClassPath: function (path) {
+    getResourceReference: function (path) {
 
-        return !!path.match('.+' + CONFIG.CLASS_EXTENSION + '$');
+        return this.resourcesByPath[path];
+
+    },
+
+    createReference: function (path) {
+
+        switch (this.guessResourceType(path)) {
+
+            case 'class':
+                return this.createClassReference(path);
+
+            case 'script':
+                break;
+
+            case 'image':
+                break;
+
+            case 'other':
+                return {};
+
+        }
+
+    },
+
+    guessResourceType: function (path) {
+
+        if (!!path.match('.+' + CONFIG.CLASS_EXTENSION + '$')) {
+            return 'class';
+        } else if (!!path.match('.+\\.js$')) {
+            return 'script';
+        } else if (!!path.match('.+\\.[jpg|jpeg|png]$')) {
+            return 'image';
+        } else {
+            return 'other';
+        }
+
+    },
+
+    createClassReference: function (path) {
+
+        // Create a temporary constructor until one is defined.
+        this.constructorsByPath[path] = this.createTemporaryConstructor();
+
+        return function () {
+            // As we do not know the constructor body yet, we need to call it by a dynamic reference so we can override it later with actual implementation.
+            importUtils.constructorsByPath[path].apply(this, arguments);
+        };
+
+    },
+
+    createTemporaryConstructor: function () {
+
+        return function () {
+            throw new Error('Class not ready yet.');
+        };
+
+    },
+
+    add: function (path, ref, callback) {
+
+        this.queue.push({path: path, ref: ref, callback: callback});
 
     },
 
@@ -283,17 +349,24 @@ ImportUtils = {
 
     },
 
-    httpGet: function (url, script, successHandler, failureHandler) {
+    load: function (path, callback) {
 
-        if (script) {
+        switch (this.guessResourceType(path)) {
 
-            console.log('import script', url);
+            case 'class':
+                console.log('loading class');
+            case 'script':
+                console.log('loading script', path);
+                break;
 
-        } else {
+            case 'image':
+                break;
 
-            console.log('load text', url);
+            case 'other':
+                break;
 
         }
+
     },
 
     run: function () {
@@ -311,19 +384,19 @@ ImportUtils = {
 
         var self = this,
             resource,
-            handler;
+            callback;
 
         if (this.queue.length !== 0) {
 
             resource = this.queue.splice(0, 1)[0];
-            handler = function () {
+            callback = function () {
                 self.onImportComplete();
-                if (typeof resource.handler === 'function') {
-                    resource.handler();
+                if (typeof resource.callback === 'function') {
+                    resource.callback();
                 }
             };
 
-            this.httpGet(resource.isClass ? this.resolveUrl(resource.path) : path, resource.isClass, handler);
+            this.load(resource.path, callback)
 
         }
 
@@ -337,48 +410,29 @@ ImportUtils = {
 
 
 /**
- * Import
+ * import$
  * @param path
  * @constructor
  */
-Import = function (path, handler) {
+import$ = function (path, callback) {
 
-    var ref = null;
+    var ref = importUtils.getResourceReference(path);
 
     // Check whether this resource has already been imported. If yes, simply return a reference to it.
-    if (ImportUtils.imported.indexOf(path) === -1) {
+    if (ref) {
 
-        // Check if the imported resource most likely is a class.
-        if (ImportUtils.isClassPath(path)) {
-
-            // Create a temporary constructor until one is defined.
-            ImportUtils.constructorsByPath[path] = function () {
-                throw new Error('Class not ready yet.');
-            };
-
-            // Create a reference for the class.
-            ref = function () {
-                // As we do not know the constructor body yet, we need to call it by reference so we can override it later with actual implementation.
-                ImportUtils.constructorsByPath[path].apply(this, arguments);
-            };
-
-            // Add the path to import queue.
-            ImportUtils.queue.push({path: path, handler: handler, ref: ref, isClass: true});
-
-        } else {
-
-            // Add the path to import queue.
-            ImportUtils.queue.push({path: path, handler: handler, ref: ref, isClass: false});
-
-        }
-
-        // Execute the import.
-        ImportUtils.run();
+        // TODO: check if it is imported and if yes, invoke the callback
 
     } else {
 
-        // Return existing reference to the resouece.
-        ref = ImportUtils.resourcesByPath[path];
+        // Create a temporary reference to the imported resource.
+        ref = importUtils.createReference(path);
+
+        // Add the path to import queue.
+        importUtils.add(path, ref, callback);
+
+        // Execute the import.
+        importUtils.run();
 
     }
 
@@ -391,4 +445,4 @@ Import = function (path, handler) {
  * Exports
  * @type {Function}
  */
-window.Import = Import;
+window.import$ = import$;

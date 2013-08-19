@@ -1,0 +1,54 @@
+/**
+ * @author magic
+ * @copyright 2013 magic
+ * Date: 8/19/13
+ * Time: 1:34 AM
+ */
+
+/*global import$, class$, abstract$, final$, singleton$ */
+
+var Base = import$('packageone.Base');
+
+(function () {
+    'use strict';
+
+    class$('Main', {extend$: Base, implement$: []}, {
+
+        static$: {
+
+            public$: {
+            },
+
+            protected$: {
+            },
+
+            private$: {
+            }
+
+        },
+
+        instance$: {
+
+            public$: {
+
+                /**
+                 * Main constructor
+                 * @constructor
+                 */
+                Main: function () {
+                    return;
+                }
+
+            },
+
+            protected$: {
+            },
+
+            private$: {
+            }
+
+        }
+
+    });
+
+}());

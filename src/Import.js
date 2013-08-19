@@ -9,24 +9,83 @@
 /**
  * Import
  */
-var Import,
-    ImportUtils;
+var import$,
+    importUtils;
 
 
 /**
  * Internal Import utility functions
  */
-ImportUtils = {
+importUtils = {
 
-    queue: [],
-    imported: [],
-    importTimeoutId: -1,
     resourcesByPath: {},
     constructorsByPath: {},
+    importTimeoutId: -1,
+    queue: [],
 
-    isClassPath: function (path) {
+    getResourceReference: function (path) {
 
-        return !!path.match('.+' + CONFIG.CLASS_EXTENSION + '$');
+        return this.resourcesByPath[path];
+
+    },
+
+    createReference: function (path) {
+
+        switch (this.guessResourceType(path)) {
+
+            case 'class':
+                return this.createClassReference(path);
+
+            case 'script':
+                break;
+
+            case 'image':
+                break;
+
+            case 'other':
+                return {};
+
+        }
+
+    },
+
+    guessResourceType: function (path) {
+
+        if (!!path.match('.+' + CONFIG.CLASS_EXTENSION + '$')) {
+            return 'class';
+        } else if (!!path.match('.+\\.js$')) {
+            return 'script';
+        } else if (!!path.match('.+\\.[jpg|jpeg|png]$')) {
+            return 'image';
+        } else {
+            return 'other';
+        }
+
+    },
+
+    createClassReference: function (path) {
+
+        // Create a temporary constructor until one is defined.
+        this.constructorsByPath[path] = this.createTemporaryConstructor();
+
+        return function () {
+            // As we do not know the constructor body yet, we need to call it by a dynamic reference so we can override it later with actual implementation.
+            importUtils.constructorsByPath[path].apply(this, arguments);
+        };
+
+    },
+
+    createTemporaryConstructor: function () {
+
+        return function () {
+            throw new Error('Class not ready yet.');
+        };
+
+    },
+
+    add: function (path, ref, callback) {
+
+        this.queue.push({path: path, ref: ref, callback: callback});
 
     },
 
@@ -36,17 +95,24 @@ ImportUtils = {
 
     },
 
-    httpGet: function (url, script, successHandler, failureHandler) {
+    load: function (path, callback) {
 
-        if (script) {
+        switch (this.guessResourceType(path)) {
 
-            console.log('import script', url);
+            case 'class':
+                console.log('loading class');
+            case 'script':
+                console.log('loading script', path);
+                break;
 
-        } else {
+            case 'image':
+                break;
 
-            console.log('load text', url);
+            case 'other':
+                break;
 
         }
+
     },
 
     run: function () {
@@ -64,19 +130,19 @@ ImportUtils = {
 
         var self = this,
             resource,
-            handler;
+            callback;
 
         if (this.queue.length !== 0) {
 
             resource = this.queue.splice(0, 1)[0];
-            handler = function () {
+            callback = function () {
                 self.onImportComplete();
-                if (typeof resource.handler === 'function') {
-                    resource.handler();
+                if (typeof resource.callback === 'function') {
+                    resource.callback();
                 }
             };
 
-            this.httpGet(resource.isClass ? this.resolveUrl(resource.path) : path, resource.isClass, handler);
+            this.load(resource.path, callback)
 
         }
 
@@ -90,48 +156,29 @@ ImportUtils = {
 
 
 /**
- * Import
+ * import$
  * @param path
  * @constructor
  */
-Import = function (path, handler) {
+import$ = function (path, callback) {
 
-    var ref = null;
+    var ref = importUtils.getResourceReference(path);
 
     // Check whether this resource has already been imported. If yes, simply return a reference to it.
-    if (ImportUtils.imported.indexOf(path) === -1) {
+    if (ref) {
 
-        // Check if the imported resource most likely is a class.
-        if (ImportUtils.isClassPath(path)) {
-
-            // Create a temporary constructor until one is defined.
-            ImportUtils.constructorsByPath[path] = function () {
-                throw new Error('Class not ready yet.');
-            };
-
-            // Create a reference for the class.
-            ref = function () {
-                // As we do not know the constructor body yet, we need to call it by reference so we can override it later with actual implementation.
-                ImportUtils.constructorsByPath[path].apply(this, arguments);
-            };
-
-            // Add the path to import queue.
-            ImportUtils.queue.push({path: path, handler: handler, ref: ref, isClass: true});
-
-        } else {
-
-            // Add the path to import queue.
-            ImportUtils.queue.push({path: path, handler: handler, ref: ref, isClass: false});
-
-        }
-
-        // Execute the import.
-        ImportUtils.run();
+        // TODO: check if it is imported and if yes, invoke the callback
 
     } else {
 
-        // Return existing reference to the resouece.
-        ref = ImportUtils.resourcesByPath[path];
+        // Create a temporary reference to the imported resource.
+        ref = importUtils.createReference(path);
+
+        // Add the path to import queue.
+        importUtils.add(path, ref, callback);
+
+        // Execute the import.
+        importUtils.run();
 
     }
 
@@ -144,4 +191,4 @@ Import = function (path, handler) {
  * Exports
  * @type {Function}
  */
-window.Import = Import;
+window.import$ = import$;

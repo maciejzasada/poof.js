@@ -5,6 +5,8 @@
  * Time: 1:49 AM
  */
 
-var AbstractClass = function () {
+var abstract$ = function () {
 
 };
+
+window.abstract$ = abstract$;
