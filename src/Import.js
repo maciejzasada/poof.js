@@ -22,6 +22,7 @@ importUtils = {
     constructorsByPath: {},
     importTimeoutId: -1,
     queue: [],
+    dependent: [],
 
     getResourceReference: function (path) {
 
@@ -60,6 +61,24 @@ importUtils = {
         } else {
             return 'other';
         }
+
+    },
+
+    registerDependend: function (id, ref, name, meta, definition) {
+
+        var pending = [],
+            i;
+        if (meta && meta.extends$ && !meta.extends$.ready$) {
+            pending.push(meta.extends$);
+        }
+        if (meta && meta.implements$) {
+            for (i = 0; i < meta.implements$.length; ++i) {
+                if (!meta.implements$[i].ready$) {
+                    pending.push(meta.implements$[i]);
+                }
+            }
+        }
+        this.dependent.push({id: id, ref: ref, name: name, definition: definition, pending: pending});
 
     },
 

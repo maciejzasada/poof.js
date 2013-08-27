@@ -31,7 +31,7 @@ var interface$ = function (name, definition) {
         }
     }
 
-    meta.ready = true;
+    meta.ready$ = true;
 
     return meta;
 

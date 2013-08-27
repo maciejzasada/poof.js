@@ -654,7 +654,7 @@
                     public$: {
                         override$: {
                             testMethod1: function () {
-                                equal(typeof super$, 'function');
+                                equal(typeof this.testMethod1.super$, 'function');
                             }
                         }
                     }
@@ -670,7 +670,7 @@
                     public$: {
                         override$: {
                             testMethod1: function () {
-                                return super$();
+                                return this.testMethod1.super$();
                             }
                         }
                     }
@@ -801,33 +801,14 @@
 
         test('Impossible to inherit from a final class', function () {
             try {
-                SubClass = class$('BaseClass', {type$: class$.PUBLIC, extends$: BaseClass, implements$: []}, {
+                BaseClass = class$('BaseClass', {type$: class$.PUBLIC | class$.FINAL, extends$: null, implements$: []}, {
+                });
+                SubClass = class$('SubClass', {type$: class$.PUBLIC, extends$: BaseClass, implements$: []}, {
                 });
                 ok(false, 'no exception raised when trying to extend a final class');
             } catch (e) {
                 ok(true, 'exception raised when trying to extend a final class');
             }
-        });
-
-    }
-
-    /**
-     * Tests prevention of instance extension.
-     */
-    function testPreventionOfInstanceExtension() {
-
-        module('Prevention of instance extension');
-
-        var TestClass,
-            instance;
-
-        TestClass = class$('TestClass', {type$: class$.PUBLIC, extends$: null, implements$: []}, {
-        });
-
-        test('impossible to extend instance of a class', function () {
-            instance = new TestClass();
-            instance.test = 'extended';
-            equal(instance.test, undefined);
         });
 
     }
@@ -848,7 +829,7 @@
 
         asyncTest('extended from an imported dependency class', function () {
             expect(1);
-            TestClass.ready$(function () {
+            TestClass.onReady$(function () {
                 instance = new TestClass();
                 equal(instance.testMethod(), 'test');
             });
@@ -871,14 +852,13 @@
 //        testMemberAccessibility();
         testDefiningInterfaces();
         testImplementingInterfaces();
-//        testSingleInheritance();
-//        testOverridingInstanceMethods();
-//        testSuper();
+        testSingleInheritance();
+        testOverridingInstanceMethods();
+        testSuper();
         testPublicClasses();
         testAbstractClasses();
         testSingletonClasses();
-//        testFinalClasses();
-//        testPreventionOfInstanceExtension();
+        testFinalClasses();
 //        testDependencyImports();
 
     }

@@ -19,7 +19,9 @@ var STATIC = 1,
 
     classIdSeed = 1,
     constructorsById,
+    callbacksById,
     transcribeProperty,
+    overrideProperty,
     defineClass,
     class$,
     duringSingletonInstantiation = false;
@@ -29,7 +31,32 @@ var STATIC = 1,
  */
 constructorsById = {};
 
-transcribeProperty = function (ref, name, prop, value, visibility, scope) {
+/**
+ * Callbacks when class finishes asynchronous initialisation.
+ * @type {{}}
+ */
+callbacksById = {};
+
+/**
+ * Transcribes property from class definition onto the class object.
+ * @param ref
+ * @param name
+ * @param prop
+ * @param value
+ * @param visibility
+ * @param scope
+ * @param override
+ */
+transcribeProperty = function (ref, name, prop, value, visibility, scope, override) {
+
+    // Prevent accidental overriding.
+    if (!override && ref[prop] !== undefined) {
+        if (typeof ref[prop] === 'function') {
+            throw new Error('Illegal attempt to implicitly override method ' + prop + ' originally defined in the base class by class ' + name + '. Overriding has to be marked explicitly by defining the new implementation within the override$ tag.');
+        } else {
+            throw new Error('Illegal attempt to redefine property ' + prop + ' already defined in the base class.');
+        }
+    }
 
     if (prop.toUpperCase() === prop) {
 
@@ -48,8 +75,42 @@ transcribeProperty = function (ref, name, prop, value, visibility, scope) {
 
     } else {
 
-        // Variable
-        ref[prop] = value;
+        if (typeof value === 'function') {
+            if (override) {
+                if (ref[prop]) {
+                    var baseMethod = ref[prop];
+                    ref[prop] = value;
+                    ref[prop].super$ = function () {
+                        return baseMethod.apply(this, arguments);
+                    };
+                } else {
+                    throw new Error('Attempt to override method ' + prop + ' that has not been defined by the base class by class ' + name);
+                }
+            } else {
+                ref[prop] = value;
+            }
+        } else {
+            ref[prop] = value;
+        }
+    }
+
+};
+
+/**
+ * Overrides property originally defined on the base class.
+ * @param ref
+ * @param name
+ * @param prop
+ * @param value
+ * @param visibility
+ */
+overrideProperty = function (ref, name, prop, value, visibility) {
+
+    if (typeof value === 'function') {
+        // Override.
+        transcribeProperty(ref, name, prop, value, visibility, INSTANCE, true);
+    } else {
+        throw new Error('Illegal attempt to override property ' + prop + ' by class ' + name + '. Only methods can be overridden.');
     }
 
 };
@@ -68,6 +129,8 @@ defineClass = function (id, ref, name, meta, definition) {
         Constructor,
         interfaceMethod,
         prop,
+        BaseClass = meta && meta.extends$ ? meta.extends$ : null,
+        final,
         i,
         j;
 
@@ -111,37 +174,77 @@ defineClass = function (id, ref, name, meta, definition) {
         }
     }
 
+    // Inheritance.
+    if (BaseClass) {
+        if (typeof BaseClass === 'function') {
+            if (BaseClass.final$) {
+                throw new Error('Invalid attempt to extend a final class ' + BaseClass.name$ + ' by class ' + name);
+            }
+            try {
+                ref.prototype = new BaseClass();
+            } catch (e) {
+                throw new Error('Error during establishing inheritance for class ' + name + '. Base class constructor has raised an exception when invoked with no arguments.');
+            }
+        } else {
+            throw new Error('Base class for ' + name + ' is of invalid type');
+        }
+    }
+
     // Instance properties.
     if (definition.instance$) {
 
         // Public properties.
         if (definition.instance$.public$) {
+
+            // New properties.
             for (prop in definition.instance$.public$) {
                 transcribeProperty(ref.prototype, name, prop, definition.instance$.public$[prop], PUBLIC, INSTANCE);
+            }
+
+            // Overridden properties.
+            if (definition.instance$.public$.override$) {
+                for (prop in definition.instance$.public$.override$) {
+                    overrideProperty(ref.prototype, name, prop, definition.instance$.public$.override$[prop], PUBLIC);
+                }
             }
         }
 
         // Protected properties.
         if (definition.instance$.protected$) {
+
+            // New properties.
             for (prop in definition.instance$.protected$) {
                 transcribeProperty(ref.prototype, name, prop, definition.instance$.protected$[prop], PROTECTED, INSTANCE);
+            }
+
+            // Overridden properties.
+            if (definition.instance$.protected$.override$) {
+                for (prop in definition.instance$.protected$.override$) {
+                    overrideProperty(ref.prototype, name, prop, definition.instance$.protected$.override$[prop], PROTECTED);
+                }
             }
         }
 
         // Private properties.
         if (definition.instance$.private$) {
+
+            // New properties.
             for (prop in definition.instance$.private$) {
                 transcribeProperty(ref.prototype, name, prop, definition.instance$.private$[prop], PRIVATE, INSTANCE);
+            }
+
+            // Overridden properties.
+            if (definition.instance$.private$.override$) {
+                throw new Error('Illegal attempt to override private properties by class ' + name);
             }
         }
     }
 
     // Define constructor.
     BaseConstructor = function () {
-//        Object.preventExtensions(this);
     };
 
-    if (!meta.type$ || meta.type$ === class$.PUBLIC) {
+    if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {
 
         Constructor = function () {
             BaseConstructor.call(this);
@@ -153,7 +256,7 @@ defineClass = function (id, ref, name, meta, definition) {
             throw new Error('Illegal attempt to directly instantiate an abstract class ' + name);
         };
 
-    } else if (meta.type$ === class$.SINGLETON) {
+    } else if (meta.type$ === class$.SINGLETON || meta.type$ === (class$.SINGLETON | class$.FINAL)) {
 
         var instance;
 
@@ -173,8 +276,25 @@ defineClass = function (id, ref, name, meta, definition) {
             return instance;
         });
 
+    } else {
+        throw new Error('Invalid type specified for class ' + name);
     }
 
+    // Mark class as final if needed.
+    final = !!(meta.type$ && (meta.type$ & class$.FINAL));
+    ref.__defineGetter__('final$', function () {
+        return final;
+    });
+
+    // Define class name.
+    ref.__defineGetter__('name$', function () {
+        return name;
+    });
+
+    // Mark class are ready.
+    ref.ready$ = true;
+
+    // Override the temporary constructor that was created earlier.
     constructorsById[id] = Constructor;
 
 };
@@ -209,12 +329,12 @@ class$ = function (name, meta, definition) {
     }
 
     // Check if there are any dependencies that are not loaded yet.
-    if (meta.extends$ && !meta.extends$.ready) {
+    if (meta.extends$ && !meta.extends$.ready$) {
         ready = false;
     }
     if (meta.implements$) {
         for (i = 0; i < meta.implements$.length; ++i) {
-            if (!meta.implements$[i].ready) {
+            if (!meta.implements$[i].ready$) {
                 ready = false;
                 break;
             }
@@ -237,7 +357,19 @@ class$ = function (name, meta, definition) {
         constructorsById[id] = function () {
             throw new Error('Class ' + name + ' not ready.');
         };
-        // TODO: ImportUtils.registerDependent(ref, meta, define);
+
+        ref.onReady$ = function (callback) {
+            if (typeof callback === 'function') {
+                if (ref.ready$) {
+                    callback();
+                } else {
+                    callbacksById[id] = callbacksById[id] || [];
+                    callbacksById[id].push(callback);
+                }
+            }
+        };
+
+        importUtils.registerDependend(id, ref, name, meta, definition);
     }
 
     return ref;

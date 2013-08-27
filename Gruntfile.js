@@ -18,9 +18,6 @@ module.exports = function (grunt) {
         $jsClasses = [
             'src/poof.js',
             'src/class.js',
-            'src/abstract.js',
-            'src/final.js',
-            'src/singleton.js',
             'src/interface.js',
             'src/import.js'
         ],
