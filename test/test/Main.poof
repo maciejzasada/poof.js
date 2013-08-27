@@ -12,7 +12,7 @@ var Base = import$('packageone.Base');
 (function () {
     'use strict';
 
-    class$('Main', {extend$: Base, implement$: []}, {
+    class$('Main', {type$: class$.PUBLIC, extends$: Base, implements$: []}, {
 
         static$: {
 
@@ -37,6 +37,10 @@ var Base = import$('packageone.Base');
                  */
                 Main: function () {
                     return;
+                },
+
+                override$: {
+
                 }
 
             },
