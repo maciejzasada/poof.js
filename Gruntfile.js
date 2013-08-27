@@ -23,7 +23,6 @@ module.exports = function (grunt) {
             'src/singleton.js',
             'src/interface.js',
             'src/import.js'
-
         ],
 
         $jsGlobals = [];
@@ -35,15 +34,11 @@ module.exports = function (grunt) {
     grunt.initConfig({
 
         clean: {
-
             build: ['build']
-
         },
 
         jslint: {
-
             main: {
-
                 options: {
                     junit: 'log/junit.xml',
                     log: 'log/lint.log',
@@ -53,9 +48,7 @@ module.exports = function (grunt) {
                     shebang: true,
                     checkstyle: 'log/checkstyle.xml'
                 },
-
                 directives: {
-
                     bitwise: true,
                     browser: true,
                     debug: false,
@@ -67,25 +60,17 @@ module.exports = function (grunt) {
                         'console'
                     ])
                 },
-
                 src: ['src/**/*.js'],
-
                 exclude: ['src/_poof.js']
-
             }
-
         },
 
         jshint: {
-
             gruntfile: ['Gruntfile.js']
-
         },
 
         concat: {
-
             options: {
-
                 separator: '\n\n',
                 banner: '/**' +
                     '\n * ' +
@@ -95,105 +80,80 @@ module.exports = function (grunt) {
                     '\n * @version ' + VERSION_STRING +
                     '\n * @date ' + '<%= grunt.template.today("yyyy/mm/dd HH:MM:ss") %>' +
                     '\n */\n\n',
-
                 process: function (src, filepath) {
-
                     return '/* ---------- Source: ' + filepath + ' ---------- */\n\n' + src.replace(/\{\{VERSION\}\}/g, VERSION).replace(/\{\{REVISION\}\}/g, REVISION).replace(/\{\{BUILD\}\}/g, BUILD);
-
                 }
-
             },
-
             js: {
-
                 src: $jsClasses,
                 dest: 'build/poof-' + VERSION_STRING + '.js'
-
             }
-
         },
 
-
         uglify: {
-
             options: {
                 wrap: true
             },
-
             main: {
                 files: {
                     'build/poof.min.js': ['build/poof-' + VERSION_STRING + '.js']
                 }
             }
-
         },
 
         copy: {
-
             js: {
-
                 files: [
                     {
                         expand: true,
                         cwd: 'build',
                         src: ['poof-' + VERSION_STRING + '.js'],
                         dest: 'test/vendor',
-                        rename: function(dest, src) {
+                        rename: function (dest, src) {
                             return dest + '/poof.js';
                         }
                     }
                 ]
-
             }
-
         },
 
         exec: {
-
             increment_build_number: {
                 command: '[[ `cat Gruntfile.js` =~ (BUILD = ([0-9]+)) ]] && sed "s/BUILD = [[:digit:]]*,/BUILD = $((${BASH_REMATCH[2]} + 1)),/g" Gruntfile.js > Gruntfile.tmp && cat Gruntfile.tmp > Gruntfile.js && rm Gruntfile.tmp && echo BUILD = $((${BASH_REMATCH[2]} + 1))',
                 stdout: true,
                 stderr: true
             }
+        },
 
+        qunit: {
+            files: ['test/index.html']
         },
 
         notify: {
-
             debug: {
                 options: {
                     title: 'Build Complete [DEBUG]',
                     message: 'poof.js debug build completed successfully'
                 }
             },
-
             release: {
                 options: {
                     title: 'Build Complete [RELEASE]',
                     message: 'poof.js release build completed successfully'
                 }
             }
-
         },
 
         watch: {
-
             grunt: {
-
                 files: ['Gruntfile.js'],
                 tasks: ['debug']
-
             },
-
             js: {
-
                 files: ['src/**/*.js'],
                 tasks: ['debug']
-
             }
-
         }
-
     });
 
     // Grunt plugins.
@@ -206,7 +166,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-exec');
     grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-qunit');
 
+    grunt.registerTask('test', 'qunit');
     grunt.registerTask('debug', ['jshint', 'clean', 'jslint', 'concat:js', 'copy:js', 'notify:debug']);
     grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number', 'notify:release']);
     grunt.registerTask('default', ['debug']);
