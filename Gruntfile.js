@@ -1,6 +1,6 @@
 /**
- * @author Maciej Zasada maciejzsd@gmail.com
- * @copyright Maciej Zasada maciejzsd@gmail.com
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright Maciej Zasada hello@maciejzasada.com
  * Date: 2013/07/04
  */
 
@@ -12,7 +12,7 @@ module.exports = function (grunt) {
         REVISION = 4,
         BUILD = 0,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
-        AUTHOR = 'Maciej Zasada maciejzsd@gmail.com',
+        AUTHOR = 'Maciej Zasada hello@maciejzasada.com',
         COPYRIGHT = '2013 Maciej Zasada',
 
         $jsClasses = [
@@ -20,13 +20,7 @@ module.exports = function (grunt) {
             'src/class.js',
             'src/interface.js',
             'src/import.js'
-        ],
-
-        $jsGlobals = [];
-
-    $jsClasses.forEach(function (url) {
-        $jsGlobals.push(url.substring(url.lastIndexOf('/') + 1, url.indexOf('.js')) + '$');
-    });
+        ];
 
     grunt.initConfig({
 
@@ -53,12 +47,9 @@ module.exports = function (grunt) {
                     nomen: true,
                     plusplus: true,
                     sloppy: true,
-                    predef: $jsGlobals.concat([
-                        'console'
-                    ])
+                    predef: ['console']
                 },
-                src: ['src/**/*.js'],
-                exclude: ['src/_poof.js']
+                src: ['src/**/*.js']
             }
         },
 
