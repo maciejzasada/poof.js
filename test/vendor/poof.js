@@ -1,9 +1,9 @@
 /**
  * poof.js
- * @author Maciej Zasada maciejzsd@gmail.com
+ * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.0
- * @date 2013/08/28 01:20:37
+ * @date 2013/09/01 14:04:46
  */
 
 /* ---------- Source: src/poof.js ---------- */
@@ -178,6 +178,17 @@ var STATIC = 1,
     PROTECTED = 2,
     PRIVATE = 3,
 
+    SCOPES = [
+        {field: 'static$', type: STATIC},
+        {field: 'instance$', type: INSTANCE}
+    ],
+
+    ACCESSIBILITIES = [
+        {field: 'public$', type: PUBLIC},
+        {field: 'protected$', type: PROTECTED},
+        {field: 'private$', type: PRIVATE}
+    ],
+
     classIdSeed = 1,
     constructorsById,
     callbacksById,
@@ -209,6 +220,11 @@ callbacksById = {};
  * @param override
  */
 transcribeProperty = function (ref, name, prop, value, visibility, scope, override) {
+
+    // Skip constructor
+    if (name === prop) {
+        return;
+    }
 
     // Prevent accidental overriding.
     if (!override && ref[prop] !== undefined) {
@@ -290,6 +306,10 @@ defineClass = function (id, ref, name, meta, definition) {
         Constructor,
         interfaceMethod,
         prop,
+        prop2,
+        defined,
+        scope,
+        accessibility,
         BaseClass = meta && meta.extends$ ? meta.extends$ : null,
         final,
         i,
@@ -310,31 +330,6 @@ defineClass = function (id, ref, name, meta, definition) {
         }
     }
 
-    // Static properties.
-    if (definition.static$) {
-
-        // Public properties.
-        if (definition.static$.public$) {
-            for (prop in definition.static$.public$) {
-                transcribeProperty(ref, name, prop, definition.static$.public$[prop], PUBLIC, STATIC);
-            }
-        }
-
-        // Protected properties.
-        if (definition.static$.protected$) {
-            for (prop in definition.static$.protected$) {
-                transcribeProperty(ref, name, prop, definition.static$.protected$[prop], PROTECTED, STATIC);
-            }
-        }
-
-        // Private properties.
-        if (definition.static$.private$) {
-            for (prop in definition.static$.private$) {
-                transcribeProperty(ref, name, prop, definition.static$.private$[prop], PRIVATE, STATIC);
-            }
-        }
-    }
-
     // Inheritance.
     if (BaseClass) {
         if (typeof BaseClass === 'function') {
@@ -351,64 +346,56 @@ defineClass = function (id, ref, name, meta, definition) {
         }
     }
 
-    // Instance properties.
-    if (definition.instance$) {
-
-        // Public properties.
-        if (definition.instance$.public$) {
-
-            // New properties.
-            for (prop in definition.instance$.public$) {
-                transcribeProperty(ref.prototype, name, prop, definition.instance$.public$[prop], PUBLIC, INSTANCE);
-            }
-
-            // Overridden properties.
-            if (definition.instance$.public$.override$) {
-                for (prop in definition.instance$.public$.override$) {
-                    overrideProperty(ref.prototype, name, prop, definition.instance$.public$.override$[prop], PUBLIC);
+    // Transcribe properties
+    for (i = 0; i < SCOPES.length; ++i) {
+        scope = SCOPES[i];
+        defined = [];
+        if (definition[scope.field]) {
+            for (j = 0; j < ACCESSIBILITIES.length; ++j) {
+                accessibility = ACCESSIBILITIES[j];
+                if (definition[scope.field][accessibility.field]) {
+                    for (prop in definition[scope.field][accessibility.field]) {
+                        if (prop === 'override$') {
+                            if (scope.type === STATIC) {
+                                throw new Error('Illegal attempt to override static properties by class ' + name);
+                            } else {
+                                for (prop2 in definition[scope.field][accessibility.field]['override$']) {
+                                    overrideProperty(ref.prototype, name, prop2, definition[scope.field][accessibility.field][prop][prop2], accessibility.type);
+                                }
+                            }
+                        } else {
+                            if (defined.indexOf(prop) === -1) {
+                                transcribeProperty(scope.type === STATIC ? ref : ref.prototype, name, prop, definition[scope.field][accessibility.field][prop], accessibility.type, scope.type);
+                                defined.push(prop);
+                            } else {
+                                throw new Error('Illegal attempt to redefine property ' + prop + ' on class ' + name);
+                            }
+                        }
+                    }
                 }
-            }
-        }
-
-        // Protected properties.
-        if (definition.instance$.protected$) {
-
-            // New properties.
-            for (prop in definition.instance$.protected$) {
-                transcribeProperty(ref.prototype, name, prop, definition.instance$.protected$[prop], PROTECTED, INSTANCE);
-            }
-
-            // Overridden properties.
-            if (definition.instance$.protected$.override$) {
-                for (prop in definition.instance$.protected$.override$) {
-                    overrideProperty(ref.prototype, name, prop, definition.instance$.protected$.override$[prop], PROTECTED);
-                }
-            }
-        }
-
-        // Private properties.
-        if (definition.instance$.private$) {
-
-            // New properties.
-            for (prop in definition.instance$.private$) {
-                transcribeProperty(ref.prototype, name, prop, definition.instance$.private$[prop], PRIVATE, INSTANCE);
-            }
-
-            // Overridden properties.
-            if (definition.instance$.private$.override$) {
-                throw new Error('Illegal attempt to override private properties by class ' + name);
             }
         }
     }
 
     // Define constructor.
-    BaseConstructor = function () {
-    };
+    if (definition.instance$ && definition.instance$.public$ && definition.instance$.public$[name]) {
+        BaseConstructor = function () {
+            definition.instance$.public$[name].apply(this, arguments);
+        };
+        if (BaseClass) {
+            BaseConstructor.super$ = function () {
+                BaseClass.apply(this, arguments);
+            }
+        }
+    } else {
+        BaseConstructor = function () {
+        };
+    }
 
     if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {
 
         Constructor = function () {
-            BaseConstructor.call(this);
+            BaseConstructor.apply(this, arguments);
         };
 
     } else if (meta.type$ === class$.ABSTRACT) {
@@ -425,7 +412,7 @@ defineClass = function (id, ref, name, meta, definition) {
             if (!duringSingletonInstantiation) {
                 throw new Error('Invalid attempt to directly instantiate a Singleton class ' + name);
             }
-            BaseConstructor.call(this);
+            BaseConstructor.apply(this, arguments);
         };
 
         ref.__defineGetter__('instance', function () {

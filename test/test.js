@@ -147,6 +147,31 @@
     }
 
     /**
+     * Tests constructors.
+     */
+    function testConstructors() {
+
+        module('Constructors');
+
+        var TestClass = class$('TestClass', {type$: class$.PUBLIC, extends$: null, implements$: []}, {
+            instance$: {
+                public$: {
+                    constructorDefinedProperty: 'default',
+                    TestClass: function () {
+                        this.constructorDefinedProperty = 'constructor';
+                    }
+                }
+            }
+        }),
+            instance = new TestClass();
+
+        test('Constructor is invoked when instantiating the class', function () {
+            equal(instance.constructorDefinedProperty, 'constructor');
+        });
+
+    }
+
+    /**
      * Tests default variable value transcription.
      */
     function testDefaultVariableValueTranscription() {
@@ -847,6 +872,7 @@
         testDefiningInstanceMethods();
         testDefiningStaticVariables();
         testDefiningStaticMethods();
+        testConstructors();
         testDefaultVariableValueTranscription();
         testConstants();
 //        testMemberAccessibility();
