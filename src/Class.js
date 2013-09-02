@@ -31,11 +31,13 @@ var STATIC = 1,
     classIdSeed = 1,
     constructorsById,
     callbacksById,
+    createIdentifiableFunction,
     transcribeProperty,
     overrideProperty,
     defineClass,
     class$,
-    duringSingletonInstantiation = false;
+    duringSingletonInstantiation = false,
+    callStack = [];
 
 /**
  * Keeps constructors by class ID.
@@ -49,16 +51,32 @@ constructorsById = {};
 callbacksById = {};
 
 /**
+ * Creates a function that can be identified in terms of owner class.
+ * @param ref
+ * @param value
+ * @returns {Function}
+ */
+createIdentifiableFunction = function (ref, value) {
+    return function () {
+        var retValue;
+        callStack.push(ref);
+        retValue = value.apply(this, arguments);
+        callStack.pop();
+        return retValue;
+    };
+};
+
+/**
  * Transcribes property from class definition onto the class object.
  * @param ref
  * @param name
  * @param prop
  * @param value
- * @param visibility
+ * @param accessibility
  * @param scope
  * @param override
  */
-transcribeProperty = function (ref, name, prop, value, visibility, scope, override) {
+transcribeProperty = function (ref, name, prop, value, accessibility, scope, override) {
 
     // Skip constructor
     if (name === prop) {
@@ -95,7 +113,7 @@ transcribeProperty = function (ref, name, prop, value, visibility, scope, overri
             if (override) {
                 if (ref[prop]) {
                     var baseMethod = ref[prop];
-                    ref[prop] = value;
+                    ref[prop] = createIdentifiableFunction(ref, value);
                     ref[prop].super$ = function () {
                         return baseMethod.apply(this, arguments);
                     };
@@ -103,10 +121,60 @@ transcribeProperty = function (ref, name, prop, value, visibility, scope, overri
                     throw new Error('Attempt to override method ' + prop + ' that has not been defined by the base class by class ' + name);
                 }
             } else {
-                ref[prop] = value;
+                ref[prop] = createIdentifiableFunction(ref, value);
             }
         } else {
-            ref[prop] = value;
+            switch (accessibility) {
+                case PUBLIC:
+                    ref[prop] = value;
+                    break;
+
+                case PROTECTED:
+                    ref.__defineGetter__(prop, function () {
+                        if (callStack.length !== 0 && ref === callStack[callStack.length - 1] || callStack[callStack.length - 1] instanceof ref.constructor) {
+                            return value;
+                        } else {
+                            throw new Error('Illegal attempt to access protected property ' + prop + ' from outside ' + name + '\'s inheritance chain');
+                        }
+                    });
+                    ref.__defineSetter__(prop, function (value) {
+                        if (callStack.length !== 0 && ref === callStack[callStack.length - 1] || callStack[callStack.length - 1] instanceof ref.constructor) {
+                            ref.__defineGetter__(prop, function () {
+                                if (callStack.length !== 0 && ref === callStack[callStack.length - 1] || callStack[callStack.length - 1] instanceof ref.constructor) {
+                                    return value;
+                                } else {
+                                    throw new Error('Illegal attempt to access protected property ' + prop + ' from outside ' + name + '\'s inheritance chain');
+                                }
+                            });
+                        } else {
+                            throw new Error('Illegal attempt to access protected property ' + prop + ' from outside ' + name + '\'s inheritance chain');
+                        }
+                    });
+                    break;
+
+                case PRIVATE:
+                    ref.__defineGetter__(prop, function () {
+                        if (callStack.length !== 0 && ref === callStack[callStack.length - 1]) {
+                            return value;
+                        } else {
+                            throw new Error('Illegal attempt to access private property ' + prop + ' from outside class ' + name);
+                        }
+                    });
+                    ref.__defineSetter__(prop, function (value) {
+                        if (callStack.length !== 0 && ref === callStack[callStack.length - 1]) {
+                            ref.__defineGetter__(prop, function () {
+                                if (callStack.length !== 0 && ref === callStack[callStack.length - 1]) {
+                                    return value;
+                                } else {
+                                    throw new Error('Illegal attempt to access private property ' + prop + ' from outside class ' + name);
+                                }
+                            });
+                        } else {
+                            throw new Error('Illegal attempt to access private property ' + prop + ' from outside class ' + name);
+                        }
+                    });
+                    break;
+            }
         }
     }
 

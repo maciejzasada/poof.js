@@ -362,30 +362,85 @@
                     privateVar: 'private'
                 }
             }
-        });
+        }),
 
-        test('Public variables accessible', function () {
+            SubClass = class$('SubClass', {type$: class$.PUBLIC, extends$: TestClass, implements$: []}, {
+                instance$: {
+                    public$: {
+                        getProtected: function () {
+                            return this.protectedVar;
+                        },
+                        getPrivate: function () {
+                            return this.privateVar;
+                        }
+                    }
+                }
+
+            });
+
+        test('Accessing public members from outside the class', function () {
             var instance = new TestClass();
             equal(TestClass.publicVar, 'public');
             equal(instance.publicVar, 'public');
+            TestClass.publicVar = 'new';
+            instance.publicVar = 'new';
+            equal(TestClass.publicVar, 'new');
+            equal(instance.publicVar, 'new');
         });
 
         test('Accessing protected members from outside the class', function () {
-            var instance = new TestClass();
-            equal(TestClass.protectedVar, undefined);
-            equal(instance.protectedVar, undefined);
+            var instance = new TestClass(),
+                a;
+            try {
+                a = TestClass.protectedVar;
+                ok(false, 'No exception raised when attempted to access protected static variable from outside the class');
+            } catch (e) {
+                ok(true, 'Exception raised when attempted to access protected static variable from outside the class');
+            }
+            try {
+                a = instance.protectedVar;
+                ok(false, 'No exception raised when attempted to access protected instance variable from outside the class');
+            } catch (e) {
+                ok(true, 'Exception raised when attempted to access protected instance variable from outside the class');
+            }
         });
 
         test('Accessing private members from outside the class', function () {
-            var instance = new TestClass();
-            equal(TestClass.privateVar, undefined);
-            equal(instance.privateVar, undefined);
+            var instance = new TestClass(),
+                a;
+            try {
+                a = TestClass.privateVar;
+                ok(false, 'No exception raised when attempted to access private static variable from outside the class');
+            } catch (e) {
+                ok(true, 'Exception raised when attempted to access private static variable from outside the class');
+            }
+            try {
+                a = instance.privateVar;
+                ok(false, 'No exception raised when attempted to access private instance variable from outside the class');
+            } catch (e) {
+                ok(true, 'Exception raised when attempted to access private instance variable from outside the class');
+            }
         });
 
         test('Accessing private members from within the class', function () {
             var instance = new TestClass();
             equal(TestClass.publicMethod(), 'private');
             equal(instance.publicMethod(), 'private');
+        });
+
+        test('Accessing protected members from subclass', function () {
+            var instance = new SubClass();
+            equal(instance.getProtected(), 'protected');
+        });
+
+        test('Accessing private members from subclass', function () {
+            var instance = new SubClass();
+            try {
+                instance.getPrivate();
+                ok(false, 'No exception raised when attempted to access private instance variable from subclass');
+            } catch (e) {
+                ok(true, 'Exception raised when attempted to access private instance variable from subclass');
+            }
         });
 
     }
@@ -875,7 +930,7 @@
         testConstructors();
         testDefaultVariableValueTranscription();
         testConstants();
-//        testMemberAccessibility();
+        testMemberAccessibility();
         testDefiningInterfaces();
         testImplementingInterfaces();
         testSingleInheritance();
