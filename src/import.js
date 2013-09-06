@@ -1,6 +1,6 @@
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 7/4/13
  * Time: 12:34 AM
  */
@@ -210,4 +210,4 @@ import$ = function (path, callback) {
  * Exports
  * @type {Function}
  */
-window.import$ = import$;
+module.exports.import$ = import$;

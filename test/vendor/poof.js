@@ -2,15 +2,15 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.0
- * @date 2013/09/03 01:48:30
+ * @version 0.4.1
+ * @date 2013/09/06 02:51:31
  */
 
 /* ---------- Source: src/poof.js ---------- */
 
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 7/4/13
  * Time: 12:54 AM
  */
@@ -20,10 +20,21 @@
  * poof object
  * @type {{}}
  */
-var poof,
+var module = module || {},
+    window = window || {},
+    document = document || {},
+    navigator = navigator || {},
+    poof,
     CONFIG,
     domReady,
     initApp;
+
+
+/**
+ * node.js compatibility
+ * @type {*|window|window|{}}
+ */
+module.exports = window || {};
 
 
 /**
@@ -56,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('0', 10);
+    return parseInt('1', 10);
 });
 
 
@@ -154,14 +165,14 @@ domReady(function () {
  * Exports
  * @type {{}}
  */
-window.poof = poof;
+module.exports.poof = poof;
 
 
 /* ---------- Source: src/class.js ---------- */
 
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 7/4/13
  * Time: 12:34 AM
  */
@@ -680,14 +691,14 @@ class$.FINAL = 8;
  * Exports
  * @type {Function}
  */
-window.class$ = class$;
+module.exports.class$ = class$;
 
 
 /* ---------- Source: src/interface.js ---------- */
 
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 8/14/13
  * Time: 1:49 AM
  */
@@ -724,14 +735,14 @@ var interface$ = function (name, definition) {
 
 };
 
-window.interface$ = interface$;
+module.exports.interface$ = interface$;
 
 
 /* ---------- Source: src/import.js ---------- */
 
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 7/4/13
  * Time: 12:34 AM
  */
@@ -941,4 +952,4 @@ import$ = function (path, callback) {
  * Exports
  * @type {Function}
  */
-window.import$ = import$;
+module.exports.import$ = import$;

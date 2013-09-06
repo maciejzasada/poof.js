@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     var NAME = 'poof.js',
         VERSION = 0,
         REVISION = 4,
-        BUILD = 0,
+        BUILD = 2,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
         AUTHOR = 'Maciej Zasada hello@maciejzasada.com',
         COPYRIGHT = '2013 Maciej Zasada',
@@ -113,8 +113,23 @@ module.exports = function (grunt) {
             }
         },
 
+        coffee: {
+            compile: {
+                files: {
+                    'benchmarks/coffee.cjs': 'benchmarks/**/*.coffee'
+                }
+            }
+        },
+
         qunit: {
             files: ['test/index.html']
+        },
+
+        benchmark: {
+            all: {
+                src: ['benchmarks/*.js'],
+                dest: 'benchmarks/results.csv'
+            }
         },
 
         notify: {
@@ -155,8 +170,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks('grunt-contrib-coffee');
+    grunt.loadNpmTasks('grunt-benchmark');
 
     grunt.registerTask('test', 'qunit');
+    grunt.registerTask('bench', ['debug', 'coffee', 'benchmark']);
     grunt.registerTask('debug', ['jshint', 'clean', 'jslint', 'concat:js', 'copy:js', 'notify:debug']);
     grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number', 'notify:release']);
     grunt.registerTask('default', ['debug']);

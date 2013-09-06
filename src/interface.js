@@ -1,6 +1,6 @@
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 8/14/13
  * Time: 1:49 AM
  */
@@ -37,4 +37,4 @@ var interface$ = function (name, definition) {
 
 };
 
-window.interface$ = interface$;
+module.exports.interface$ = interface$;

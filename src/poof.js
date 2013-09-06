@@ -1,6 +1,6 @@
 /**
- * @author Maciej Zasada maciej@unit9.com
- * @copyright 2013 UNIT9 Ltd.
+ * @author Maciej Zasada hello@maciejzasada.com
+ * @copyright 2013 Maciej Zasada
  * Date: 7/4/13
  * Time: 12:54 AM
  */
@@ -10,10 +10,21 @@
  * poof object
  * @type {{}}
  */
-var poof,
+var module = module || {},
+    window = window || {},
+    document = document || {},
+    navigator = navigator || {},
+    poof,
     CONFIG,
     domReady,
     initApp;
+
+
+/**
+ * node.js compatibility
+ * @type {*|window|window|{}}
+ */
+module.exports = window || {};
 
 
 /**
@@ -144,4 +155,4 @@ domReady(function () {
  * Exports
  * @type {{}}
  */
-window.poof = poof;
+module.exports.poof = poof;
