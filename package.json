@@ -1,0 +1,31 @@
+{
+  "author": "maciej",
+  "name": "poof.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maciejzasada/poof.js.git"
+  },
+  "version": "0.3.0",
+  "engines": {
+    "node": ">= 0.10.4"
+  },
+  "dependencies": {
+    "grunt": "*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-jslint": "~1.0.0",
+    "grunt-exec": "~0.4.2",
+    "grunt-notify": "~0.2.13",
+    "connect": "~2.8.5",
+    "grunt-contrib-qunit": "~0.2.2",
+    "grunt-benchmark": "~0.2.0",
+    "grunt-contrib-coffee": "~0.7.0"
+  }
+}
