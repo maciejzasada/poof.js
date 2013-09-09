@@ -6,7 +6,7 @@
  */
 
 var poof = require('./inheritance/poof.js'),
-    coffee = require('./coffee.cjs');
+    coffee = require('./dev/coffee.cjs');
 
 // A test suite
 module.exports = {

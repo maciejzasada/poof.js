@@ -2,11 +2,11 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.1
- * @date 2013/09/06 02:51:31
+ * @version 0.4.2
+ * @date 2013/09/09 15:17:03
  */
 
-/* ---------- Source: src/poof.js ---------- */
+/* ---------- Source: src/dev/poof.js ---------- */
 
 /**
  * @author Maciej Zasada hello@maciejzasada.com
@@ -67,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('1', 10);
+    return parseInt('2', 10);
 });
 
 
@@ -168,7 +168,7 @@ domReady(function () {
 module.exports.poof = poof;
 
 
-/* ---------- Source: src/class.js ---------- */
+/* ---------- Source: src/dev/class.js ---------- */
 
 /**
  * @author Maciej Zasada hello@maciejzasada.com
@@ -694,7 +694,7 @@ class$.FINAL = 8;
 module.exports.class$ = class$;
 
 
-/* ---------- Source: src/interface.js ---------- */
+/* ---------- Source: src/dev/interface.js ---------- */
 
 /**
  * @author Maciej Zasada hello@maciejzasada.com
@@ -738,7 +738,7 @@ var interface$ = function (name, definition) {
 module.exports.interface$ = interface$;
 
 
-/* ---------- Source: src/import.js ---------- */
+/* ---------- Source: src/dev/import.js ---------- */
 
 /**
  * @author Maciej Zasada hello@maciejzasada.com

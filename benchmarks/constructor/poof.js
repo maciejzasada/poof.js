@@ -5,7 +5,7 @@
  * Time: 2:11 AM
  */
 
-var poof = require('../../build/poof-0.4.0.js');
+var poof = require(grunt.config.poofBenchmarkPath);
 
 var TestClassPoof = poof.class$('TestClass', {type$: poof.class$.PUBLIC, extends$: null, implements$: []}, {
 

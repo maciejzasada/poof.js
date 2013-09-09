@@ -15,29 +15,36 @@ module.exports = function (grunt) {
         AUTHOR = 'Maciej Zasada hello@maciejzasada.com',
         COPYRIGHT = '2013 Maciej Zasada',
 
-        $jsClasses = [
-            'src/poof.js',
-            'src/class.js',
-            'src/interface.js',
-            'src/import.js'
+        $jsClassesDev = [
+            'src/dev/poof.js',
+            'src/dev/class.js',
+            'src/dev/interface.js',
+            'src/dev/import.js'
+        ],
+        $jsClassesProd = [
+            'src/prod/poof.js',
+            'src/prod/class.js',
+            'src/prod/interface.js',
+            'src/prod/import.js'
         ];
 
     grunt.initConfig({
 
         clean: {
-            build: ['build']
+            dev: ['build/dev'],
+            prod: ['build/prod']
         },
 
         jslint: {
-            main: {
+            dev: {
                 options: {
-                    junit: 'log/junit.xml',
-                    log: 'log/lint.log',
-                    jslintXml: 'log/jslint_xml.xml',
+                    junit: 'log/dev/junit.xml',
+                    log: 'log/dev/lint.log',
+                    jslintXml: 'log/dev/jslint_xml.xml',
                     errorsOnly: false,
                     failOnError: false,
                     shebang: true,
-                    checkstyle: 'log/checkstyle.xml'
+                    checkstyle: 'log/dev/checkstyle.xml'
                 },
                 directives: {
                     bitwise: true,
@@ -49,7 +56,29 @@ module.exports = function (grunt) {
                     sloppy: true,
                     predef: ['console']
                 },
-                src: ['src/**/*.js']
+                src: ['src/dev/**/*.js']
+            },
+            prod: {
+                options: {
+                    junit: 'log/prod/junit.xml',
+                    log: 'log/prod/lint.log',
+                    jslintXml: 'log/prod/jslint_xml.xml',
+                    errorsOnly: false,
+                    failOnError: false,
+                    shebang: true,
+                    checkstyle: 'log/prod/checkstyle.xml'
+                },
+                directives: {
+                    bitwise: true,
+                    browser: true,
+                    debug: false,
+                    node: false,
+                    nomen: true,
+                    plusplus: true,
+                    sloppy: true,
+                    predef: ['console']
+                },
+                src: ['src/prod/**/*.js']
             }
         },
 
@@ -72,9 +101,44 @@ module.exports = function (grunt) {
                     return '/* ---------- Source: ' + filepath + ' ---------- */\n\n' + src.replace(/\{\{VERSION\}\}/g, VERSION).replace(/\{\{REVISION\}\}/g, REVISION).replace(/\{\{BUILD\}\}/g, BUILD);
                 }
             },
-            js: {
-                src: $jsClasses,
-                dest: 'build/poof-' + VERSION_STRING + '.js'
+            devVersion: {
+                src: $jsClassesDev,
+                dest: 'build/dev/poof-dev-' + VERSION_STRING + '.js'
+            },
+            devLatest: {
+                src: $jsClassesDev,
+                dest: 'build/dev/poof-dev-latest.js'
+            },
+            prodVersion: {
+                src: $jsClassesProd,
+                dest: 'build/prod/poof-' + VERSION_STRING + '.js'
+            },
+            prodLatest: {
+                src: $jsClassesProd,
+                dest: 'build/prod/poof-latest.js'
+            }
+        },
+
+        copy: {
+            dev: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'build/dev',
+                        src: ['poof-dev-latest.js'],
+                        dest: 'test/vendor'
+                    }
+                ]
+            },
+            prod: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'build/prod',
+                        src: ['poof-latest.js'],
+                        dest: 'test/vendor'
+                    }
+                ]
             }
         },
 
@@ -82,26 +146,15 @@ module.exports = function (grunt) {
             options: {
                 wrap: true
             },
-            main: {
+            dev: {
                 files: {
-                    'build/poof.min.js': ['build/poof-' + VERSION_STRING + '.js']
+                    'build/dev/poof-dev.min.js': ['build/poof-dev-' + VERSION_STRING + '.js']
                 }
-            }
-        },
-
-        copy: {
-            js: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: 'build',
-                        src: ['poof-' + VERSION_STRING + '.js'],
-                        dest: 'test/vendor',
-                        rename: function (dest, src) {
-                            return dest + '/poof.js';
-                        }
-                    }
-                ]
+            },
+            prod: {
+                files: {
+                    'build/prod/poof.min.js': ['build/poof-' + VERSION_STRING + '.js']
+                }
             }
         },
 
@@ -122,7 +175,7 @@ module.exports = function (grunt) {
         },
 
         qunit: {
-            files: ['test/index.html']
+            files: ['test/*.html']
         },
 
         benchmark: {
@@ -133,10 +186,16 @@ module.exports = function (grunt) {
         },
 
         notify: {
-            debug: {
+            dev: {
                 options: {
-                    title: 'Build Complete [DEBUG]',
-                    message: 'poof.js debug build completed successfully'
+                    title: 'Build Complete [DEV]',
+                    message: 'poof.js dev build completed successfully'
+                }
+            },
+            prod: {
+                options: {
+                    title: 'Build Complete [PROD]',
+                    message: 'poof.js prod build completed successfully'
                 }
             },
             release: {
@@ -152,9 +211,13 @@ module.exports = function (grunt) {
                 files: ['Gruntfile.js'],
                 tasks: ['debug']
             },
-            js: {
-                files: ['src/**/*.js'],
-                tasks: ['debug']
+            dev: {
+                files: ['src/dev/**/*.js'],
+                tasks: ['dev']
+            },
+            prod: {
+                files: ['src/prod/**/*.js'],
+                tasks: ['prod']
             }
         }
     });
@@ -173,10 +236,21 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-benchmark');
 
+    grunt.registerTask('dev', ['jshint', 'clean:dev', 'jslint:dev', 'concat:devVersion', 'concat:devLatest', 'copy:dev', 'notify:dev']);
+    grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod', 'notify:prod']);
+    grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number', 'notify:release']);
     grunt.registerTask('test', 'qunit');
-    grunt.registerTask('bench', ['debug', 'coffee', 'benchmark']);
-    grunt.registerTask('debug', ['jshint', 'clean', 'jslint', 'concat:js', 'copy:js', 'notify:debug']);
-    grunt.registerTask('release', ['clean', 'debug', 'uglify', 'exec:increment_build_number', 'notify:release']);
-    grunt.registerTask('default', ['debug']);
+    grunt.registerTask('default', ['dev', 'prod']);
+
+    grunt.registerTask('benchmark-dev', 'Benchmark dev', function () {
+        global.poofPath = 'something';
+        grunt.log.writeln('benchmark dev');
+        grunt.task.run('benchmark');
+    });
+
+    grunt.registerTask('benchmark-prod', 'Benchmark prod', function () {
+        grunt.config('poofPath', 'something');
+        grunt.log.writeln('benchmark prod');
+    });
 
 };

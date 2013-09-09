@@ -5,7 +5,7 @@
  * Time: 2:33 AM
  */
 
-var poof = require('../../build/poof-0.4.0.js');
+var poof = require('../../../build/dev/poof-dev-latest.js');
 
 var BaseClass = poof.class$('BaseClass', {type$: poof.class$.PUBLIC, extends$: null, implements$: []}, {
 
