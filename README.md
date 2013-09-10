@@ -74,7 +74,7 @@ There are two versions of poof.js. Dev and prod.
 * prod: this version skips all the verification steps and just makes your code work. For use in production.
 
 ### Revision history ###
-2013/04/20 - **v. 0.4.1**
+2013/09/02 - **v. 0.4.1**
 * finalised syntax, dev implementation 99%, unit tests 80%, benchmarks 20%, prod implementation 0%
 
 2013/04/20 - **v. 0.2.1**
