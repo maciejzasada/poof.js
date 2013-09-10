@@ -8,7 +8,7 @@ poof.js
 
 ### Version info ###
 Current version: 0.4.1 (RC)
-Release date: 2013/09/02
+Release date: 2013/09/02  
 Version authors: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  
 Original author: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  
 
