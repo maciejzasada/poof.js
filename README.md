@@ -3,7 +3,8 @@ poof.js
 
 [![Build Status](https://travis-ci.org/maciejzasada/poof.js.png)](https://travis-ci.org/maciejzasada/poof.js)
 
-### JavaScript Programmer's Object Oriented Framework. ###
+### Programmer's Object-Oriented Framework for browser and node.js ###
+
 
 ### Version info ###
 Current version: 0.4.1 (RC)
@@ -15,8 +16,9 @@ Original author: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada
 Poof is a lightweight framework that transforms JavaScript into a truly object-oriented language with clean and familiar syntax.
 It also enforces good programming style thanks to the proposed pattern.
 Poof works at runtime - it does not require compilation. Yet, it stays fast and does not slow down the website.
+It is compatible with browser and node.js - just like that.
 
-In particular, Poof provides:
+#### In particular, Poof provides: ####
 * dependency imports
 * classes
 * interfaces
