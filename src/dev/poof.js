@@ -24,7 +24,7 @@ var module = module || {},
  * node.js compatibility
  * @type {*|window|window|{}}
  */
-module.exports = window || {};
+module.exports = typeof global === 'undefined' ? (window || {}) : global;
 
 
 /**
