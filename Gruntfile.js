@@ -240,17 +240,7 @@ module.exports = function (grunt) {
     grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod', 'notify:prod']);
     grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number', 'notify:release']);
     grunt.registerTask('test', 'qunit');
+    grunt.registerTask('bench', ['coffee', 'benchmark']);
     grunt.registerTask('default', ['dev', 'prod']);
-
-    grunt.registerTask('benchmark-dev', 'Benchmark dev', function () {
-        global.poofPath = 'something';
-        grunt.log.writeln('benchmark dev');
-        grunt.task.run('benchmark');
-    });
-
-    grunt.registerTask('benchmark-prod', 'Benchmark prod', function () {
-        grunt.config('poofPath', 'something');
-        grunt.log.writeln('benchmark prod');
-    });
 
 };

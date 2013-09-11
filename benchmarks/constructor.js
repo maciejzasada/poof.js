@@ -6,13 +6,14 @@
  */
 
 var poof = require('./constructor/poof.js'),
-    coffee = require('./dev/coffee.cjs');
+    coffee = require('./coffee.cjs');
 
 // A test suite
 module.exports = {
     name: 'Constructor',
     tests: {
-        'poof.js': poof.constructor.run,
-        'Coffee Script': coffee.constructor.run
+        'Coffee Script': coffee.constructor.run,
+        'poof.js dev': poof.constructor.run.dev,
+        'poof.js prod': poof.constructor.run.prod
     }
 };
