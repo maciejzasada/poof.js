@@ -58,15 +58,7 @@ var STATIC = 1,
     classIdSeed = 1,
     constructorsById,
     callbacksById,
-    duringSingletonInstantiation = false,
-    callStack = [],
-    isInProtectedScope,
-    isInPrivateScope,
-    isInScope,
-    createIdentifiableFunction,
-    createAccessibleProperty,
     transcribeProperty,
-    overrideProperty,
     defineClass,
     class$;
 
@@ -80,110 +72,6 @@ constructorsById = {};
  * @type {{}}
  */
 callbacksById = {};
-
-/**
- * Creates a function that can be identified in terms of owner class.
- * @param ref
- * @param value
- * @returns {Function}
- */
-createIdentifiableFunction = function (ref, value) {
-    return function () {
-        var retValue;
-        callStack.push(ref);
-        retValue = value.apply(this, arguments);
-        callStack.pop();
-        return retValue;
-    };
-};
-
-/**
- * Checks whether the current call is being made withing ref's protected scope.
- * @param ref
- * @returns {boolean}
- */
-isInProtectedScope = function (ref) {
-    return callStack.length !== 0 && (ref === callStack[callStack.length - 1] || callStack[callStack.length - 1] instanceof ref.constructor);
-};
-
-/**
- * Checks whether the current call is being made withing ref's private scope.
- * @param ref
- * @returns {boolean}
- */
-isInPrivateScope = function (ref) {
-    return callStack.length !== 0 && ref === callStack[callStack.length - 1];
-};
-
-/**
- * Checks whether the current call is being made within a given accessibility scope.
- * @param ref
- * @param scope
- * @returns {*}
- */
-isInScope = function (ref, scope) {
-
-    switch (scope) {
-    case PROTECTED:
-        return isInProtectedScope(ref);
-    case PRIVATE:
-        return isInPrivateScope(ref);
-    }
-
-};
-
-/**
- * Creates property limited to specific accessibility.
- * @param ref
- * @param prop
- * @param value
- * @param accessibility
- */
-createAccessibleProperty = function (ref, prop, value, accessibility, scope, constant) {
-    switch (accessibility) {
-    case PUBLIC:
-        if (constant) {
-            ref.__defineGetter__(prop, function () {
-                return value;
-            });
-            ref.__defineSetter__(prop, function () {
-                throw new Error(STRINGS.ERROR_CONSTANT_MODIFICATION.replace('{prop}', prop).replace('{name}', name));
-            });
-        } else {
-            ref[prop] = value;
-        }
-        break;
-    case PROTECTED:
-    case PRIVATE:
-        ref.__defineGetter__(prop, function () {
-            if (isInScope(ref, accessibility)) {
-                return value;
-            } else {
-                throw new Error(STRINGS['ERROR_ACCESSIBILITY_' + scope.toString() + '_' + accessibility.toString()].replace('{prop}', prop).replace('{name}', name));
-            }
-        });
-        if (constant) {
-            ref.__defineSetter__(prop, function () {
-                throw new Error(STRINGS.ERROR_CONSTANT_MODIFICATION.replace('{prop}', prop).replace('{name}', name));
-            });
-        } else {
-            ref.__defineSetter__(prop, function (value) {
-                if (isInScope(ref, accessibility)) {
-                    ref.__defineGetter__(prop, function () {
-                        if (isInScope(ref, accessibility)) {
-                            return value;
-                        } else {
-                            throw new Error(STRINGS['ERROR_ACCESSIBILITY_' + scope.toString() + '_' + accessibility.toString()].replace('{prop}', prop).replace('{name}', name));
-                        }
-                    });
-                } else {
-                    throw new Error(STRINGS['ERROR_ACCESSIBILITY_' + scope.toString() + '_' + accessibility.toString()].replace('{prop}', prop).replace('{name}', name));
-                }
-            });
-        }
-        break;
-    }
-};
 
 /**
  * Transcribes property from class definition onto the class object.
@@ -202,75 +90,23 @@ transcribeProperty = function (ref, name, prop, value, accessibility, scope, ove
         return;
     }
 
-    // Prevent accidental overriding.
-    if (!override && ref[prop] !== undefined) {
-        if (typeof ref[prop] === 'function') {
-            // The function has already been defined on the base class but is not marked with override$.
-            throw new Error(STRINGS.ERROR_IMPLICIT_OVERRIDE.replace('{prop}', prop).replace('{name}', name));
-        } else {
-            // Attempt to redefine a property.
-            throw new Error(STRINGS.ERROR_PROPERTY_REDEFINE.replace('{prop}', prop).replace('{name}', name));
+    if (override) {
+        // Marked as override.
+        if (ref[prop]) {
+            // Implementation in the base class exists, so it's fine.
+            // Save a reference to the base class implementation before it's overridden.
+            var baseMethod = ref[prop];
+            // Create the new method using identifiable scope wrapper with accessibility restrictions.
+            ref[prop] = value;
+            // Create a super$ property on the overridden method.
+            value.super$ = function () {
+                return baseMethod.apply(this, arguments);
+            };
         }
-    }
-
-    // Check if it is a constant (UPPER_CASE_WITH_UNDERSCORES).
-    if (prop.toUpperCase() === prop) {
-        // Constant.
-        if (typeof value === 'function') {
-            // Functions cannot be constant.
-            throw new Error(STRINGS.ERROR_CONSTANT_METHOD.replace('{prop}', prop).replace('{name}', name));
-        }
-        // Create the constant property with accessibility restrictions.
-        createAccessibleProperty(ref, prop, value, accessibility, scope, true);
     } else {
-        // Not a constant.
-        if (typeof value === 'function') {
-            // Function.
-            if (override) {
-                // Marked as override.
-                if (ref[prop]) {
-                    // Implementation in the base class exists, so it's fine.
-                    // Save a reference to the base class implementation before it's overridden.
-                    var baseMethod = ref[prop];
-                    // Create the new method using identifiable scope wrapper with accessibility restrictions.
-                    createAccessibleProperty(ref, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
-                    // Create a super$ property on the overridden method.
-                    ref[prop].super$ = function () {
-                        return baseMethod.apply(this, arguments);
-                    };
-                } else {
-                    // The method marked as override has not been implemented in the base class.
-                    throw new Error(STRINGS.ERROR_OVERRIDE_NOT_EXISTING.replace('{prop}', prop).replace('{name}', name));
-                }
-            } else {
-                // Create the method using identifiable scope wrapper with accessibility restrictions.
-                createAccessibleProperty(ref, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
-            }
-        } else {
-            // Create the variable property with accessibility restrictions.
-            createAccessibleProperty(ref, prop, value, accessibility, scope, false);
-        }
+        ref[prop] = value;
     }
 
-};
-
-/**
- * Overrides property originally defined on the base class.
- * @param ref
- * @param name
- * @param prop
- * @param value
- * @param visibility
- */
-overrideProperty = function (ref, name, prop, value, visibility) {
-    // Check if the property being overridden is a function.
-    if (typeof value === 'function') {
-        // It is a function so override.
-        transcribeProperty(ref, name, prop, value, visibility, INSTANCE, true);
-    } else {
-        // Properties cannot be overridden.
-        throw new Error(STRINGS.ERROR_OVERRIDE_PROPERTY.replace('{prop}', prop).replace('{name}', name));
-    }
 };
 
 /**
@@ -285,7 +121,6 @@ defineClass = function (id, ref, name, meta, definition) {
 
     var BaseConstructor,
         Constructor,
-        interfaceMethod,
         prop,
         prop2,
         defined,
@@ -296,35 +131,9 @@ defineClass = function (id, ref, name, meta, definition) {
         i,
         j;
 
-    // Verify interface implementation.
-    if (meta && meta.implements$) {
-        for (i = 0; i < meta.implements$.length; ++i) {
-            for (j = 0; j < meta.implements$[i].length; ++j) {
-                interfaceMethod = meta.implements$[i][j];
-                if (!definition.instance$ || !definition.instance$.public$ || typeof definition.instance$.public$[interfaceMethod.name] !== 'function') {
-                    throw new Error(STRINGS.ERROR_INTERFACE_MISSING_IMPLEMENTATION.replace('{prop}', interfaceMethod.name).replace('{name}', name));
-                }
-                if (definition.instance$.public$[interfaceMethod.name].length !== interfaceMethod.length) {
-                    throw new Error(STRINGS.ERROR_INTERFACE_ARGUMENTS_NUM.replace('{prop}', interfaceMethod.name).replace('{name}', name));
-                }
-            }
-        }
-    }
-
     // Inheritance.
     if (BaseClass) {
-        if (typeof BaseClass === 'function') {
-            if (BaseClass.final$) {
-                throw new Error(STRINGS.ERROR_EXTEND_FINAL.replace('{base}', BaseClass.name$).replace('{name}', name));
-            }
-            try {
-                ref.prototype = new BaseClass();
-            } catch (e) {
-                throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name));
-            }
-        } else {
-            throw new Error(STRINGS.ERROR_EXTEND_INVALID_TYPE.replace('{name}', name));
-        }
+        ref.prototype = new BaseClass();
     }
 
     // Transcribe properties
@@ -337,20 +146,11 @@ defineClass = function (id, ref, name, meta, definition) {
                 if (definition[scope.field][accessibility.field]) {
                     for (prop in definition[scope.field][accessibility.field]) {
                         if (prop === 'override$') {
-                            if (scope.type === STATIC) {
-                                throw new Error(STRINGS.ERROR_OVERRIDE_STATIC.replace('{name}', name));
-                            } else {
-                                for (prop2 in definition[scope.field][accessibility.field].override$) {
-                                    overrideProperty(ref.prototype, name, prop2, definition[scope.field][accessibility.field][prop][prop2], accessibility.type);
-                                }
+                            for (prop2 in definition[scope.field][accessibility.field].override$) {
+                                transcribeProperty(ref.prototype, name, prop2, definition[scope.field][accessibility.field][prop][prop2], accessibility.type, INSTANCE, true);
                             }
                         } else {
-                            if (defined.indexOf(prop) === -1) {
-                                transcribeProperty(scope.type === STATIC ? ref : ref.prototype, name, prop, definition[scope.field][accessibility.field][prop], accessibility.type, scope.type);
-                                defined.push(prop);
-                            } else {
-                                throw new Error(STRINGS.ERROR_DEFINITION_DUPLICATE);
-                            }
+                            transcribeProperty(scope.type === STATIC ? ref : ref.prototype, name, prop, definition[scope.field][accessibility.field][prop], accessibility.type, scope.type);
                         }
                     }
                 }
@@ -360,9 +160,7 @@ defineClass = function (id, ref, name, meta, definition) {
 
     // Define constructor.
     if (definition.instance$ && definition.instance$.public$ && definition.instance$.public$[name]) {
-        BaseConstructor = function () {
-            definition.instance$.public$[name].apply(this, arguments);
-        };
+        BaseConstructor = definition.instance$.public$[name];
         if (BaseClass) {
             BaseConstructor.super$ = function () {
                 BaseClass.apply(this, arguments);
@@ -375,9 +173,7 @@ defineClass = function (id, ref, name, meta, definition) {
 
     if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {
 
-        Constructor = function () {
-            BaseConstructor.apply(this, arguments);
-        };
+        Constructor = BaseConstructor;
 
     } else if (meta.type$ === class$.ABSTRACT) {
 
@@ -389,18 +185,11 @@ defineClass = function (id, ref, name, meta, definition) {
 
         var instance;
 
-        Constructor = function () {
-            if (!duringSingletonInstantiation) {
-                throw new Error(STRINGS.ERROR_INSTANTIATION_DIRECT_SINGLETON.replace('{name}', name));
-            }
-            BaseConstructor.apply(this, arguments);
-        };
+        Constructor = BaseConstructor;
 
         ref.__defineGetter__('instance', function () {
             if (!instance) {
-                duringSingletonInstantiation = true;
                 instance = new Constructor();
-                duringSingletonInstantiation = false;
             }
             return instance;
         });
@@ -441,21 +230,6 @@ class$ = function (name, meta, definition) {
         ref,
         ready = true,
         i;
-
-    // Check if class name has been specified.
-    if (typeof name !== 'string' || name.length === 0) {
-        throw new Error(STRINGS.ERROR_DEFINITION_INVALID_CLASS_NAME.replace('{name}', name));
-    }
-
-    // Check if meta object has been specified.
-    if (typeof meta !== 'object') {
-        throw new Error(STRINGS.ERROR_DEFINITION_INVALID_META.replace('{name}', name));
-    }
-
-    // Check if definition has been specified.
-    if (typeof definition !== 'object') {
-        throw new Error(STRINGS.ERROR_DEFINITION_INVALID_DEFINITION.replace('{name}', name));
-    }
 
     // Check if there are any dependencies that are not loaded yet.
     if (meta.extends$ && !meta.extends$.ready$) {
