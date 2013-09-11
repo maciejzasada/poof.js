@@ -3,7 +3,7 @@
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.2
- * @date 2013/09/09 15:17:03
+ * @date 2013/09/11 02:18:54
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */

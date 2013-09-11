@@ -5,30 +5,40 @@
  * Time: 2:11 AM
  */
 
-var poof = require(grunt.config.poofBenchmarkPath);
+var poofDev = require('../../build/dev/poof-dev-latest.js'),
+    poofProd = require('../../build/prod/poof-latest.js'),
 
-var TestClassPoof = poof.class$('TestClass', {type$: poof.class$.PUBLIC, extends$: null, implements$: []}, {
+    defineTest = function (poof) {
 
-    instance$: {
+        var TestClassPoof = poof.class$('TestClass', {type$: poof.class$.PUBLIC, extends$: null, implements$: []}, {
 
-        public$: {
+            instance$: {
 
-            variable: 15,
+                public$: {
 
-            TestClass: function () {
-                this.variable = 30;
+                    variable: 15,
+
+                    TestClass: function () {
+                        this.variable = 30;
+                    }
+
+                }
+
             }
 
+        });
+
+        return function () {
+            new TestClassPoof();
         }
 
-    }
-
-});
+    };
 
 module.exports = {
     constructor: {
-        run: function () {
-            new TestClassPoof();
+        run: {
+            dev: defineTest(poofDev),
+            prod: defineTest(poofProd)
         }
     }
 }

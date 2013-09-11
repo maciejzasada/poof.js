@@ -3,7 +3,7 @@
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.2
- * @date 2013/09/11 02:05:17
+ * @date 2013/09/11 02:21:25
  */
 
 /* ---------- Source: src/prod/poof.js ---------- */
@@ -447,6 +447,7 @@ class$ = function (name, meta, definition) {
         importUtils.registerDependend(id, ref, name, meta, definition);
     }
 
+    return function () {};
     return ref;
 
 };
