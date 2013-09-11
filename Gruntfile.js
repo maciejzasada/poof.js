@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     var NAME = 'poof.js',
         VERSION = 0,
         REVISION = 4,
-        BUILD = 2,
+        BUILD = 4,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
         AUTHOR = 'Maciej Zasada hello@maciejzasada.com',
         COPYRIGHT = '2013 Maciej Zasada',
@@ -116,6 +116,14 @@ module.exports = function (grunt) {
             prodLatest: {
                 src: $jsClassesProd,
                 dest: 'build/prod/poof-latest.js'
+            },
+            benchmarkDev: {
+                src: $jsClassesDev.concat(['benchmarks/sources/**/poof.js']),
+                dest: 'benchmarks/vendor/poof-dev.js'
+            },
+            benchmarkProd: {
+                src: $jsClassesProd.concat(['benchmarks/sources/**/poof.js']),
+                dest: 'benchmarks/vendor/poof-prod.js'
             }
         },
 
@@ -148,12 +156,12 @@ module.exports = function (grunt) {
             },
             dev: {
                 files: {
-                    'build/dev/poof-dev.min.js': ['build/poof-dev-' + VERSION_STRING + '.js']
+                    'build/dev/poof-dev.min.js': ['build/dev/poof-dev-' + VERSION_STRING + '.js']
                 }
             },
             prod: {
                 files: {
-                    'build/prod/poof.min.js': ['build/poof-' + VERSION_STRING + '.js']
+                    'build/prod/poof.min.js': ['build/prod/poof-' + VERSION_STRING + '.js']
                 }
             }
         },
@@ -166,21 +174,21 @@ module.exports = function (grunt) {
             }
         },
 
-        coffee: {
-            compile: {
-                files: {
-                    'benchmarks/coffee.cjs': 'benchmarks/**/*.coffee'
-                }
-            }
-        },
-
         qunit: {
             files: ['test/*.html']
         },
 
+        coffee: {
+            compile: {
+                files: {
+                    'benchmarks/vendor/coffee.js': 'benchmarks/sources/**/coffee.coffee'
+                }
+            }
+        },
+
         benchmark: {
             all: {
-                src: ['benchmarks/*.js'],
+                src: ['benchmarks/tests/*.js'],
                 dest: 'benchmarks/results.csv'
             }
         },
@@ -240,7 +248,7 @@ module.exports = function (grunt) {
     grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod', 'notify:prod']);
     grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number', 'notify:release']);
     grunt.registerTask('test', 'qunit');
-    grunt.registerTask('bench', ['coffee', 'benchmark']);
+    grunt.registerTask('bench', ['dev', 'prod', 'concat:benchmarkDev', 'concat:benchmarkProd', 'coffee', 'benchmark']);
     grunt.registerTask('default', ['dev', 'prod']);
 
 };

@@ -563,8 +563,7 @@
 
         module('Abstract classes');
 
-        var TestClass,
-            instance;
+        var TestClass;
 
         test('possible to define an abstract class', function () {
             try {
@@ -573,15 +572,6 @@
                 ok(true, 'possible to define an abstract class');
             } catch (e) {
                 ok(false, 'exception raised when trying to define an abstract class');
-            }
-        });
-
-        test('impossible to instantiate abstract class', function () {
-            try {
-                instance = new TestClass();
-                ok(false, 'no exception raised when trying to instantiate an abstract class');
-            } catch (e) {
-                ok(true, 'exception raised when trying to instantiate an abstract class');
             }
         });
 

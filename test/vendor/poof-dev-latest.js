@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.2
- * @date 2013/09/11 02:18:54
+ * @version 0.4.4
+ * @date 2013/09/11 18:09:50
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -67,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('2', 10);
+    return parseInt('4', 10);
 });
 
 
