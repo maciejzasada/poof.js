@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.4
- * @date 2013/09/11 22:17:16
+ * @version 0.4.6
+ * @date 2013/11/06 21:47:23
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -34,7 +34,7 @@ var module = module || {},
  * node.js compatibility
  * @type {*|window|window|{}}
  */
-module.exports = window || {};
+module.exports = typeof global === 'undefined' ? (window || {}) : global;
 
 
 /**
@@ -67,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('4', 10);
+    return parseInt('6', 10);
 });
 
 

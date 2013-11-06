@@ -6,7 +6,7 @@
  */
 
 var connect = require('connect');
-console.log('Server started on port 8081\nGo to http://localhost:80801/test-[dev|prod] to run unit tests with QUnit GUI.');
+console.log('Server started on port 8081\nGo to http://localhost:8081/test/[dev|prod].html to run unit tests with QUnit GUI.');
 connect.createServer(
     connect.static(__dirname)
 ).listen(8081);
