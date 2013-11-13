@@ -423,6 +423,13 @@ defineClass = function (id, ref, name, meta, definition) {
     // Mark class are ready.
     ref.ready$ = true;
 
+    // Handle async callbacks.
+    ref.onReady$ = function (callback) {
+        if (typeof callback === 'function') {
+            callback();
+        }
+    };
+
     // Override the temporary constructor that was created earlier.
     constructorsById[id] = Constructor;
 
@@ -487,7 +494,10 @@ class$ = function (name, meta, definition) {
             throw new Error('Class ' + name + ' not ready.');
         };
 
+        ref.ready$ = false;
+
         ref.onReady$ = function (callback) {
+            console.log('registering callback class onReady$');
             if (typeof callback === 'function') {
                 if (ref.ready$) {
                     callback();
@@ -498,7 +508,7 @@ class$ = function (name, meta, definition) {
             }
         };
 
-        importUtils.registerDependend(id, ref, name, meta, definition);
+        importUtils.registerDependent(id, ref, name, meta, definition);
     }
 
     return ref;

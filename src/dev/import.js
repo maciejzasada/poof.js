@@ -20,6 +20,7 @@ importUtils = {
 
     resourcesByPath: {},
     constructorsByPath: {},
+    handlersByPath: {},
     importTimeoutId: -1,
     queue: [],
     dependent: [],
@@ -52,7 +53,7 @@ importUtils = {
 
     guessResourceType: function (path) {
 
-        if (!!path.match('.+' + CONFIG.CLASS_EXTENSION + '$')) {
+        if (!!path.match('\\.[A-Z]+.*$')) {
             return 'class';
         } else if (!!path.match('.+\\.js$')) {
             return 'script';
@@ -64,7 +65,7 @@ importUtils = {
 
     },
 
-    registerDependend: function (id, ref, name, meta, definition) {
+    registerDependent: function (id, ref, name, meta, definition) {
 
         var pending = [],
             i;
@@ -84,13 +85,23 @@ importUtils = {
 
     createClassReference: function (path) {
 
+        var ref;
+
         // Create a temporary constructor until one is defined.
         this.constructorsByPath[path] = this.createTemporaryConstructor();
+        this.handlersByPath[path] = this.handlersByPath[path] || [];
 
-        return function () {
+        ref = function () {
             // As we do not know the constructor body yet, we need to call it by a dynamic reference so we can override it later with actual implementation.
             importUtils.constructorsByPath[path].apply(this, arguments);
         };
+
+        ref.onReady$ = function (callback) {
+            console.log('registering callback for', path);
+            this.handlersByPath[path].push(callback);
+        };
+
+        return ref;
 
     },
 
