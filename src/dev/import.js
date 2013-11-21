@@ -23,7 +23,9 @@ importUtils = {
     handlersByPath: {},
     importTimeoutId: -1,
     queue: [],
-    dependent: [],
+    dependentByDependencies: {},
+    dependenciesByDependent: {},
+    callbacks: {},
 
     getResourceReference: function (path) {
 
@@ -65,21 +67,39 @@ importUtils = {
 
     },
 
-    registerDependent: function (id, ref, name, meta, definition) {
+    registerDependent: function (ref, dependencies) {
 
-        var pending = [],
-            i;
-        if (meta && meta.extends$ && !meta.extends$.ready$) {
-            pending.push(meta.extends$);
-        }
-        if (meta && meta.implements$) {
-            for (i = 0; i < meta.implements$.length; ++i) {
-                if (!meta.implements$[i].ready$) {
-                    pending.push(meta.implements$[i]);
+        var i;
+
+        ref.ready$ = false;
+
+        ref.onReady$ = function (callback) {
+            console.log('registering onReady$ callback');
+            if (typeof callback === 'function') {
+                if (ref.ready$) {
+                    callback();
+                } else {
+                    importUtils.callbacks[ref] = importUtils.callbacks[ref] || [];
+                    if (importUtils.callbacks[ref].indexOf(callback) === -1) {
+                        importUtils.callbacks[ref].push(callback);
+                    }
                 }
             }
+        };
+
+        for (i = 0; i < dependencies.length; ++i) {
+            this.dependentByDependencies[dependencies[i]] = this.dependentByDependencies[dependencies[i]] || [];
+            this.dependentByDependencies[dependencies[i]].push(ref);
         }
-        this.dependent.push({id: id, ref: ref, name: name, definition: definition, pending: pending});
+
+        this.dependenciesByDependent[ref] = dependencies;
+
+    },
+
+    notifyReady: function (ref) {
+
+        // TODO: implement
+        console.log('[READY]', ref);
 
     },
 
@@ -172,13 +192,9 @@ importUtils = {
                 }
             };
 
-            this.load(resource.path, callback)
+            this.load(resource.path, callback);
 
         }
-
-    },
-
-    onImportComplete: function () {
 
     }
 
@@ -201,6 +217,7 @@ import$ = function (path, callback) {
 
     } else {
 
+        console.log('Importing');
         // Create a temporary reference to the imported resource.
         ref = importUtils.createReference(path);
 

@@ -57,7 +57,6 @@ var STATIC = 1,
 
     classIdSeed = 1,
     constructorsById,
-    callbacksById,
     duringSingletonInstantiation = false,
     callStack = [],
     isInProtectedScope,
@@ -74,12 +73,6 @@ var STATIC = 1,
  * Keeps constructors by class ID.
  */
 constructorsById = {};
-
-/**
- * Callbacks when class finishes asynchronous initialisation.
- * @type {{}}
- */
-callbacksById = {};
 
 /**
  * Creates a function that can be identified in terms of owner class.
@@ -433,6 +426,9 @@ defineClass = function (id, ref, name, meta, definition) {
     // Override the temporary constructor that was created earlier.
     constructorsById[id] = Constructor;
 
+    // Inform dependent classes that we're ready.
+    importUtils.notifyReady(ref);
+
 };
 
 /**
@@ -446,7 +442,7 @@ class$ = function (name, meta, definition) {
 
     var id,
         ref,
-        ready = true,
+        dependencies,
         i;
 
     // Check if class name has been specified.
@@ -464,19 +460,6 @@ class$ = function (name, meta, definition) {
         throw new Error(STRINGS.ERROR_DEFINITION_INVALID_DEFINITION.replace('{name}', name));
     }
 
-    // Check if there are any dependencies that are not loaded yet.
-    if (meta.extends$ && !meta.extends$.ready$) {
-        ready = false;
-    }
-    if (meta.implements$) {
-        for (i = 0; i < meta.implements$.length; ++i) {
-            if (!meta.implements$[i].ready$) {
-                ready = false;
-                break;
-            }
-        }
-    }
-
     // Generate class unique ID.
     id = classIdSeed++;
 
@@ -485,30 +468,36 @@ class$ = function (name, meta, definition) {
         constructorsById[id].apply(this, arguments);
     };
 
-    if (ready) {
+    // Check if there are any dependencies that are not loaded yet.
+    dependencies = [];
+
+    if (meta.extends$ && !meta.extends$.ready$) {
+        dependencies.push(meta.extends$);
+    }
+
+    if (meta.implements$) {
+        for (i = 0; i < meta.implements$.length; ++i) {
+            if (!meta.implements$[i].ready$) {
+                dependencies.push(meta.implements$[i]);
+            }
+        }
+    }
+
+    if (dependencies.length === 0) {
         // Dependencies are ready, define the class now.
         defineClass(id, ref, name, meta, definition);
     } else {
+
         // Dependencies are not ready. Prepare temporary constructor and register.
         constructorsById[id] = function () {
             throw new Error('Class ' + name + ' not ready.');
         };
 
-        ref.ready$ = false;
+        importUtils.registerDependent(ref, dependencies);
 
-        ref.onReady$ = function (callback) {
-            console.log('registering callback class onReady$');
-            if (typeof callback === 'function') {
-                if (ref.ready$) {
-                    callback();
-                } else {
-                    callbacksById[id] = callbacksById[id] || [];
-                    callbacksById[id].push(callback);
-                }
-            }
-        };
-
-        importUtils.registerDependent(id, ref, name, meta, definition);
+        ref.onReady$(function () {
+            defineClass(id, ref, name, meta, definition);
+        });
     }
 
     return ref;
