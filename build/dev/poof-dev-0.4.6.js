@@ -3,7 +3,7 @@
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.6
- * @date 2013/11/21 18:32:55
+ * @date 2013/12/02 13:23:46
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -227,7 +227,7 @@ var STATIC = 1,
         ERROR_INSTANTIATION_DIRECT_SINGLETON: 'Illegal attempt to directly instantiate a Singleton class {name}'
     },
 
-    classIdSeed = 1,
+    refIdSeed = 1,
     constructorsById,
     duringSingletonInstantiation = false,
     callStack = [],
@@ -485,7 +485,7 @@ defineClass = function (id, ref, name, meta, definition) {
             try {
                 ref.prototype = new BaseClass();
             } catch (e) {
-                throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name));
+                throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name) + e.toString() + '\n' + e.stack);
             }
         } else {
             throw new Error(STRINGS.ERROR_EXTEND_INVALID_TYPE.replace('{name}', name));
@@ -585,18 +585,17 @@ defineClass = function (id, ref, name, meta, definition) {
         return name;
     });
 
-    // Mark class are ready.
-    ref.ready$ = true;
-
     // Handle async callbacks.
-    ref.onReady$ = function (callback) {
-        if (typeof callback === 'function') {
-            callback();
-        }
-    };
+    ref.onReady$ = importUtils.generateOnReadyHandler(ref);
 
     // Override the temporary constructor that was created earlier.
     constructorsById[id] = Constructor;
+    
+    // In case we were being loaded.
+    if (currentLoadPath) {
+        importUtils.constructorsByPath[currentLoadPath] = Constructor;
+        currentLoadPath = null;
+    }
 
     // Inform dependent classes that we're ready.
     importUtils.notifyReady(ref);
@@ -616,6 +615,8 @@ class$ = function (name, meta, definition) {
         ref,
         dependencies,
         i;
+        
+    console.log('-- class');
 
     // Check if class name has been specified.
     if (typeof name !== 'string' || name.length === 0) {
@@ -633,11 +634,27 @@ class$ = function (name, meta, definition) {
     }
 
     // Generate class unique ID.
-    id = classIdSeed++;
+    if (!currentLoadPath) {
+        id = refIdSeed++;
+    }
 
     // Prepare temporary reference.
-    ref = function () {
-        constructorsById[id].apply(this, arguments);
+    // In case we were being loaded.
+    if (currentLoadPath) {
+        ref = importUtils.getResourceReference(currentLoadPath);
+        id = ref.id$;
+    } else {
+        ref = function () {
+            constructorsById[id].apply(this, arguments);
+        };
+    }
+    
+    ref.__defineGetter__('id$', function () {
+        return id;
+    });
+    
+    ref.toString = function () {
+        return '[Class ' + name + ' @' + id + ']';
     };
 
     // Check if there are any dependencies that are not loaded yet.
@@ -659,7 +676,6 @@ class$ = function (name, meta, definition) {
         // Dependencies are ready, define the class now.
         defineClass(id, ref, name, meta, definition);
     } else {
-
         // Dependencies are not ready. Prepare temporary constructor and register.
         constructorsById[id] = function () {
             throw new Error('Class ' + name + ' not ready.');
@@ -751,7 +767,8 @@ module.exports.interface$ = interface$;
  * Import
  */
 var import$,
-    importUtils;
+    importUtils,
+    currentLoadPath = null;
 
 
 /**
@@ -764,8 +781,6 @@ importUtils = {
     handlersByPath: {},
     importTimeoutId: -1,
     queue: [],
-    dependentByDependencies: {},
-    dependenciesByDependent: {},
     callbacks: {},
 
     getResourceReference: function (path) {
@@ -773,27 +788,7 @@ importUtils = {
         return this.resourcesByPath[path];
 
     },
-
-    createReference: function (path) {
-
-        switch (this.guessResourceType(path)) {
-
-            case 'class':
-                return this.createClassReference(path);
-
-            case 'script':
-                break;
-
-            case 'image':
-                break;
-
-            case 'other':
-                return {};
-
-        }
-
-    },
-
+    
     guessResourceType: function (path) {
 
         if (!!path.match('\\.[A-Z]+.*$')) {
@@ -808,45 +803,34 @@ importUtils = {
 
     },
 
-    registerDependent: function (ref, dependencies) {
+    createReference: function (path) {
 
-        var i;
+        switch (this.guessResourceType(path)) {
 
-        ref.ready$ = false;
+            case 'class':
+                console.log('* class');
+                return this.createClassReference(path);
 
-        ref.onReady$ = function (callback) {
-            console.log('registering onReady$ callback');
-            if (typeof callback === 'function') {
-                if (ref.ready$) {
-                    callback();
-                } else {
-                    importUtils.callbacks[ref] = importUtils.callbacks[ref] || [];
-                    if (importUtils.callbacks[ref].indexOf(callback) === -1) {
-                        importUtils.callbacks[ref].push(callback);
-                    }
-                }
-            }
-        };
+            case 'script':
+                console.log('* script');
+                break;
 
-        for (i = 0; i < dependencies.length; ++i) {
-            this.dependentByDependencies[dependencies[i]] = this.dependentByDependencies[dependencies[i]] || [];
-            this.dependentByDependencies[dependencies[i]].push(ref);
+            case 'image':
+                console.log('* image');
+                break;
+
+            case 'other':
+                console.log('* other');
+                return {};
+
         }
 
-        this.dependenciesByDependent[ref] = dependencies;
-
     },
-
-    notifyReady: function (ref) {
-
-        // TODO: implement
-        console.log('[READY]', ref);
-
-    },
-
+    
     createClassReference: function (path) {
 
-        var ref;
+        var ref,
+            id = refIdSeed++;
 
         // Create a temporary constructor until one is defined.
         this.constructorsByPath[path] = this.createTemporaryConstructor();
@@ -857,20 +841,102 @@ importUtils = {
             importUtils.constructorsByPath[path].apply(this, arguments);
         };
 
-        ref.onReady$ = function (callback) {
-            console.log('registering callback for', path);
-            this.handlersByPath[path].push(callback);
+        ref.onReady$ = importUtils.generateOnReadyHandler(ref);
+        
+        ref.toString = function () {
+            return '[Import @' + id + ']';
         };
+        
+        ref.__defineGetter__('id$', function () {
+            return id;
+        });
+        
+        ref.__defineGetter__('path$', function () {
+            return path;
+        });
+        
+        this.resourcesByPath[path] = ref;
 
         return ref;
 
     },
-
+    
     createTemporaryConstructor: function () {
 
         return function () {
             throw new Error('Class not ready yet.');
         };
+
+    },
+    
+    generateOnReadyHandler: function (ref) {
+        return function (callback) {
+            if (typeof callback === 'function') {
+                if (ref.ready$) {
+                    callback();
+                } else {
+                    importUtils.callbacks[ref.id$] = importUtils.callbacks[ref.id$] || [];
+                    if (importUtils.callbacks[ref.id$].indexOf(callback) === -1) {
+                        importUtils.callbacks[ref.id$].push(callback);
+                    }
+                }
+            }
+        };
+    },
+
+    registerDependent: function (ref, dependencies) {
+
+        var i,
+            numDependenciesLeft = dependencies.length,
+            onDependendyLoaded = function () {
+                if (--numDependenciesLeft <= 0) {
+                    importUtils.notifyReady(ref);
+                }
+            };
+
+        ref.__defineGetter__('ready$', function () {
+            return false;
+        });
+
+        ref.onReady$ = importUtils.generateOnReadyHandler(ref);
+
+        if (dependencies.length === 0) {
+            throw new Error('This should never happen');
+        } else {
+            for (i = 0; i < dependencies.length; ++i) {
+                console.log('- Waiting for dependency', dependencies[i]);
+                dependencies[i].onReady$(onDependendyLoaded);
+            }
+        }
+
+    },
+
+    notifyReady: function (ref) {
+
+        var i;
+        
+        if (ref.ready$) {
+            return;
+        }
+        
+        console.log('[READY]', ref);
+        
+        if (currentLoadPath) {
+            importUtils.constructorsByPath[currentLoadPath] = function () {};
+            currentLoadPath = null;
+        }
+        
+        ref.__defineGetter__('ready$', function () {
+            return true;
+        });
+        
+        if (importUtils.callbacks[ref.id$]) {
+            for (i = 0; i < importUtils.callbacks[ref.id$].length; ++i) {
+                if (typeof importUtils.callbacks[ref.id$][i] === 'function') {
+                    importUtils.callbacks[ref.id$][i]();
+                }
+            }
+        }
 
     },
 
@@ -891,7 +957,10 @@ importUtils = {
         switch (this.guessResourceType(path)) {
 
             case 'class':
-                console.log('loading class');
+                var url = path.replace(/\./g, '/') + '.js';
+                console.log('loading class', url);
+                this.xhr(url, callback);
+                break;
             case 'script':
                 console.log('loading script', path);
                 break;
@@ -904,6 +973,20 @@ importUtils = {
 
         }
 
+    },
+    
+    xhr: function (url, callback) {
+        var xobj = new XMLHttpRequest();
+        // xobj.overrideMimeType("application/json");
+        xobj.open('GET', url, true);
+        xobj.onreadystatechange = function () {
+            if (xobj.readyState == 4 && xobj.status == '200') {
+                if (typeof callback === 'function') {
+                    callback(xobj.responseText);
+                }
+            }
+        }.bind(this);
+        xobj.send(null);
     },
 
     run: function () {
@@ -926,8 +1009,10 @@ importUtils = {
         if (this.queue.length !== 0) {
 
             resource = this.queue.splice(0, 1)[0];
-            callback = function () {
-                self.onImportComplete();
+            callback = function (script) {
+                currentLoadPath = resource.path;
+                eval(script);
+                importUtils.notifyReady(resource.ref);
                 if (typeof resource.callback === 'function') {
                     resource.callback();
                 }
@@ -958,7 +1043,6 @@ import$ = function (path, callback) {
 
     } else {
 
-        console.log('Importing');
         // Create a temporary reference to the imported resource.
         ref = importUtils.createReference(path);
 

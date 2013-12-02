@@ -55,7 +55,7 @@ var STATIC = 1,
         ERROR_INSTANTIATION_DIRECT_SINGLETON: 'Illegal attempt to directly instantiate a Singleton class {name}'
     },
 
-    classIdSeed = 1,
+    refIdSeed = 1,
     constructorsById,
     duringSingletonInstantiation = false,
     callStack = [],
@@ -313,7 +313,7 @@ defineClass = function (id, ref, name, meta, definition) {
             try {
                 ref.prototype = new BaseClass();
             } catch (e) {
-                throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name));
+                throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name) + e.toString() + '\n' + e.stack);
             }
         } else {
             throw new Error(STRINGS.ERROR_EXTEND_INVALID_TYPE.replace('{name}', name));
@@ -413,18 +413,17 @@ defineClass = function (id, ref, name, meta, definition) {
         return name;
     });
 
-    // Mark class are ready.
-    ref.ready$ = true;
-
     // Handle async callbacks.
-    ref.onReady$ = function (callback) {
-        if (typeof callback === 'function') {
-            callback();
-        }
-    };
+    ref.onReady$ = importUtils.generateOnReadyHandler(ref);
 
     // Override the temporary constructor that was created earlier.
     constructorsById[id] = Constructor;
+    
+    // In case we were being loaded.
+    if (currentLoadPath) {
+        importUtils.constructorsByPath[currentLoadPath] = Constructor;
+        currentLoadPath = null;
+    }
 
     // Inform dependent classes that we're ready.
     importUtils.notifyReady(ref);
@@ -444,6 +443,8 @@ class$ = function (name, meta, definition) {
         ref,
         dependencies,
         i;
+        
+    console.log('-- class');
 
     // Check if class name has been specified.
     if (typeof name !== 'string' || name.length === 0) {
@@ -461,11 +462,27 @@ class$ = function (name, meta, definition) {
     }
 
     // Generate class unique ID.
-    id = classIdSeed++;
+    if (!currentLoadPath) {
+        id = refIdSeed++;
+    }
 
     // Prepare temporary reference.
-    ref = function () {
-        constructorsById[id].apply(this, arguments);
+    // In case we were being loaded.
+    if (currentLoadPath) {
+        ref = importUtils.getResourceReference(currentLoadPath);
+        id = ref.id$;
+    } else {
+        ref = function () {
+            constructorsById[id].apply(this, arguments);
+        };
+    }
+    
+    ref.__defineGetter__('id$', function () {
+        return id;
+    });
+    
+    ref.toString = function () {
+        return '[Class ' + name + ' @' + id + ']';
     };
 
     // Check if there are any dependencies that are not loaded yet.
@@ -487,7 +504,6 @@ class$ = function (name, meta, definition) {
         // Dependencies are ready, define the class now.
         defineClass(id, ref, name, meta, definition);
     } else {
-
         // Dependencies are not ready. Prepare temporary constructor and register.
         constructorsById[id] = function () {
             throw new Error('Class ' + name + ' not ready.');

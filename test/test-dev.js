@@ -912,6 +912,7 @@
             TestClass.onReady$(function () {
                 instance = new TestClass();
                 equal(instance.testMethod(), 'test');
+                start();
             });
         });
 
@@ -940,7 +941,7 @@
         testAbstractClasses();
         testSingletonClasses();
         testFinalClasses();
-//        testDependencyImports();
+        testDependencyImports();
 
     }
 

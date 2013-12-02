@@ -9,7 +9,7 @@
 
     'use strict';
 
-    class$('BaseClass', {type$: class$.PUBLIC, extends$: null, implements$: []}, {
+    class$('DependencyClass', {type$: class$.PUBLIC, extends$: null, implements$: []}, {
 
         instance$: {
 
