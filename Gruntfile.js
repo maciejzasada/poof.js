@@ -225,23 +225,13 @@ module.exports = function (grunt) {
             }
         },
         
-        connect: {
-            server: {
-                options: {
-                    hostname: '127.0.0.1',
-                    port: 8000,
-                    base: '.'
-                }
-            }
-        },
-
         qunit: {
             all: {
                 options: {
                     timeout: 5000,
                     urls: [
-                      'http://localhost:8000/test/dev.html?phantom',
-                      'http://localhost:8000/test/prod.html?phantom'
+                      'test/dev.html?phantom',
+                      'test/prod.html?phantom'
                     ]
                 }
             }
@@ -261,12 +251,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-benchmark');
-    grunt.loadNpmTasks('grunt-contrib-connect');
 
     grunt.registerTask('dev', ['jshint', 'clean:dev', 'jslint:dev', 'concat:devVersion', 'concat:devLatest', 'copy:dev', 'notify:dev']);
     grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod', 'notify:prod']);
     grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number', 'notify:release']);
-    grunt.registerTask('test', ['connect', 'qunit']);
+    grunt.registerTask('test', ['qunit']);
     grunt.registerTask('bench', ['dev', 'prod', 'concat:benchmarkDev', 'concat:benchmarkProd', 'coffee', 'benchmark']);
     grunt.registerTask('default', ['dev', 'prod']);
 
