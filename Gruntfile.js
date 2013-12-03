@@ -240,8 +240,8 @@ module.exports = function (grunt) {
                 options: {
                     timeout: 5000,
                     urls: [
-                      'http://localhost:8000/test/dev.html',
-                      'http://localhost:8000/test/prod.html'
+                      'http://localhost:8000/test/dev.html?phantom',
+                      'http://localhost:8000/test/prod.html?phantom'
                     ]
                 }
             }

@@ -941,7 +941,10 @@
         testAbstractClasses();
         testSingletonClasses();
         testFinalClasses();
-        testDependencyImports();
+        
+        if (window.location.search.indexOf('phantom') === -1) {
+            testDependencyImports();
+        }
 
     }
 
