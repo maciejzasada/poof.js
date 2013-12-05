@@ -22,7 +22,6 @@
     "grunt-contrib-jshint": "~0.6.3",
     "grunt-jslint": "~1.0.0",
     "grunt-exec": "~0.4.2",
-    "grunt-notify": "~0.2.13",
     "connect": "~2.8.5",
     "grunt-contrib-qunit": "~0.2.2",
     "grunt-benchmark": "~0.2.0",

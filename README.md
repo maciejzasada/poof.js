@@ -1,83 +1,74 @@
-poof.js
-=======
+Evented I/O for V8 javascript. [![Build Status](https://secure.travis-ci.org/joyent/node.png)](http://travis-ci.org/joyent/node)
+===
 
-[![Build Status](https://travis-ci.org/maciejzasada/poof.js.png)](https://travis-ci.org/maciejzasada/poof.js)
+### To build:
 
-### Programmer's Object-Oriented Framework for browser and node.js ###
+Prerequisites (Unix only):
 
+    * GCC 4.2 or newer
+    * Python 2.6 or 2.7
+    * GNU Make 3.81 or newer
+    * libexecinfo (FreeBSD and OpenBSD only)
 
-### Version info ###
-Current version: 0.4.1 (RC)
-Release date: 2013/09/02  
-Version authors: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  
-Original author: Maciej Zasada ([@maciejzasada](https://twitter.com/maciejzasada))  
+Unix/Macintosh:
 
-### Description ###
-Poof is a lightweight framework that transforms JavaScript into a truly object-oriented language with clean and familiar syntax.
-It also enforces good programming style thanks to the proposed pattern.
-Poof works at runtime - it does not require compilation. Yet, it stays fast and does not slow down the website.
-It is compatible with browser and node.js - just like that.
+    ./configure
+    make
+    make install
 
-#### In particular, Poof provides: ####
-* dependency imports
-* classes
-* interfaces
-* public members
-* private members
-* protected members
-* instance and static members
-* constants
-* abstract classes
-* Singleton classes
-* final classes
-* runtime error checking
+If your python binary is in a non-standard location or has a
+non-standard name, run the following instead:
 
-### Example code using poof.js ###
-```javascript
-var SomeOtherClass = import$('package.sub.SomeOtherClass'),
-    IInterfaceOne = import$('another.package.IInterfaceOne'),
-    IInterfaceTwo = import$('another.package.IInterfaceTwo');
-    
-var TestClass = class$('TestClass', {type$: class$.PUBLIC, extends$: SomeOtherClass, implements$: [IInterfaceOne, IInterfaceTwo]}, {
-    static$: {
-        public$: {
-            publicVar: 'public',
-            publicMethod: function () {
-                return TestClass.privateVar;
-            }
-        },
-        protected$: {
-            protectedVar: 'protected'
-        },
-        private$: {
-            privateVar: 'private'
-        }
-    },
-    instance$: {
-        public$: {
-            publicVar: 'public',
-            publicMethod: function () {
-                return this.privateVar;
-            }
-        },
-        protected$: {
-            protectedVar: 'protected'
-        },
-        private$: {
-            privateVar: 'private'
-        }
-    }
-});
-```
+    export PYTHON=/path/to/python
+    $PYTHON ./configure
+    make
+    make install
 
-### dev vs prod ###
-There are two versions of poof.js. Dev and prod.
-* dev: this version performs sanity checks on the code. It will notify, for example, whether there is an attempt to access a private member from outside the class or if there is an attempt to implicitly override a method already defined in the base class.
-* prod: this version skips all the verification steps and just makes your code work. For use in production.
+Windows:
 
-### Revision history ###
-2013/09/02 - **v. 0.4.1**
-* finalised syntax, dev implementation 99%, unit tests 80%, benchmarks 20%, prod implementation 0%
+    vcbuild.bat
 
-2013/04/20 - **v. 0.2.1**
-* started work on Beta version, from scratch (not using anything from version 0.1 (Alpha))
+You can download pre-built binaries for various operating systems from
+[http://nodejs.org/download/](http://nodejs.org/download/).  The Windows
+and OS X installers will prompt you for the location to install to.
+The tarballs are self-contained; you can extract them to a local directory
+with:
+
+    tar xzf /path/to/node-<version>-<platform>-<arch>.tar.gz
+
+Or system-wide with:
+
+    cd /usr/local && tar --strip-components 1 -xzf \
+                         /path/to/node-<version>-<platform>-<arch>.tar.gz
+
+### To run the tests:
+
+Unix/Macintosh:
+
+    make test
+
+Windows:
+
+    vcbuild.bat test
+
+### To build the documentation:
+
+    make doc
+
+### To read the documentation:
+
+    man doc/node.1
+
+Resources for Newcomers
+---
+  - [The Wiki](https://github.com/joyent/node/wiki)
+  - [nodejs.org](http://nodejs.org/)
+  - [how to install node.js and npm (node package manager)](http://www.joyent.com/blog/installing-node-and-npm/)
+  - [list of modules](https://github.com/joyent/node/wiki/modules)
+  - [searching the npm registry](http://npmjs.org/)
+  - [list of companies and projects using node](https://github.com/joyent/node/wiki/Projects,-Applications,-and-Companies-Using-Node)
+  - [node.js mailing list](http://groups.google.com/group/nodejs)
+  - irc chatroom, [#node.js on freenode.net](http://webchat.freenode.net?channels=node.js&uio=d4)
+  - [community](https://github.com/joyent/node/wiki/Community)
+  - [contributing](https://github.com/joyent/node/wiki/Contributing)
+  - [big list of all the helpful wiki pages](https://github.com/joyent/node/wiki/_pages)

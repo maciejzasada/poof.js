@@ -189,27 +189,6 @@ module.exports = function (grunt) {
             }
         },
 
-        notify: {
-            dev: {
-                options: {
-                    title: 'Build Complete [DEV]',
-                    message: 'poof.js dev build completed successfully'
-                }
-            },
-            prod: {
-                options: {
-                    title: 'Build Complete [PROD]',
-                    message: 'poof.js prod build completed successfully'
-                }
-            },
-            release: {
-                options: {
-                    title: 'Build Complete [RELEASE]',
-                    message: 'poof.js release build completed successfully'
-                }
-            }
-        },
-
         watch: {
             grunt: {
                 files: ['Gruntfile.js'],
@@ -246,16 +225,15 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-exec');
-    grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-benchmark');
 
-    grunt.registerTask('dev', ['jshint', 'clean:dev', 'jslint:dev', 'concat:devVersion', 'concat:devLatest', 'copy:dev', 'notify:dev']);
-    grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod', 'notify:prod']);
-    grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number', 'notify:release']);
-    grunt.registerTask('test', ['qunit']);
+    grunt.registerTask('dev', ['jshint', 'clean:dev', 'jslint:dev', 'concat:devVersion', 'concat:devLatest', 'copy:dev']);
+    grunt.registerTask('prod', ['jshint', 'clean:prod', 'jslint:prod', 'concat:prodVersion', 'concat:prodLatest', 'copy:prod']);
+    grunt.registerTask('release', ['clean', 'dev', 'prod', 'uglify', 'exec:increment_build_number']);
+    grunt.registerTask('test', 'qunit');
     grunt.registerTask('bench', ['dev', 'prod', 'concat:benchmarkDev', 'concat:benchmarkProd', 'coffee', 'benchmark']);
     grunt.registerTask('default', ['dev', 'prod']);
 
