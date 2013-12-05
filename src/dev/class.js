@@ -392,7 +392,7 @@ defineClass = function (id, ref, name, meta, definition) {
         ref.__defineGetter__('instance', function () {
             if (!instance) {
                 duringSingletonInstantiation = true;
-                instance = new Constructor();
+                instance = new ref();
                 duringSingletonInstantiation = false;
             }
             return instance;

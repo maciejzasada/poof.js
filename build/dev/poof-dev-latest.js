@@ -3,7 +3,7 @@
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.6
- * @date 2013/12/02 13:23:46
+ * @date 2013/12/05 17:05:52
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -564,7 +564,7 @@ defineClass = function (id, ref, name, meta, definition) {
         ref.__defineGetter__('instance', function () {
             if (!instance) {
                 duringSingletonInstantiation = true;
-                instance = new Constructor();
+                instance = new ref();
                 duringSingletonInstantiation = false;
             }
             return instance;
