@@ -929,51 +929,28 @@
      */
     function run() {
 
-        // testDefiningClasses();
-        // testDefiningInstanceVariables();
-        // testDefiningInstanceMethods();
-        // testDefiningStaticVariables();
-        // testDefiningStaticMethods();
-        // testConstructors();
-        // testDefaultVariableValueTranscription();
-        // testConstants();
-        // testMemberAccessibility();
-        // testDefiningInterfaces();
-        // testImplementingInterfaces();
-        // testSingleInheritance();
-        // testOverridingInstanceMethods();
-        // testSuper();
-        // testPublicClasses();
-        // testAbstractClasses();
-        // testSingletonClasses();
-        // testFinalClasses();
+        testDefiningClasses();
+        testDefiningInstanceVariables();
+        testDefiningInstanceMethods();
+        testDefiningStaticVariables();
+        testDefiningStaticMethods();
+        testConstructors();
+        testDefaultVariableValueTranscription();
+        testConstants();
+        testMemberAccessibility();
+        testDefiningInterfaces();
+        testImplementingInterfaces();
+        testSingleInheritance();
+        testOverridingInstanceMethods();
+        testSuper();
+        testPublicClasses();
+        testAbstractClasses();
+        testSingletonClasses();
+        testFinalClasses();
         
-        // if (window.location.search.indexOf('phantom') === -1) {
-        //     testDependencyImports();
-        // }
-        
-        var MySecretClass = class$('MySecretClass', {type$: class$.PUBLIC}, {
-    instance$: {
-        public$: {
-            MySecretClass: function () {
-                this.myPrivateMethod();
-                // this.test();
-            },
-            test: function () {
-                this.myPrivateMethod();
-            }
-        },
-        private$: {
-            myPrivateMethod: function () {
-                log('I belong to MySecretClass.');
-            }
+        if (window.location.search.indexOf('phantom') === -1) {
+            testDependencyImports();
         }
-    }
-});
-
-var instance = new MySecretClass();
-//instance.privateMethod();
-
     }
 
     run();
