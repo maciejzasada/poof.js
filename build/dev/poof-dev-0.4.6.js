@@ -3,7 +3,7 @@
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
  * @version 0.4.6
- * @date 2013/12/05 17:05:52
+ * @date 2013/12/06 08:33:29
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -525,17 +525,17 @@ defineClass = function (id, ref, name, meta, definition) {
 
     // Define constructor.
     if (definition.instance$ && definition.instance$.public$ && definition.instance$.public$[name]) {
-        BaseConstructor = function () {
+        BaseConstructor = createIdentifiableFunction(ref, function () {
             definition.instance$.public$[name].apply(this, arguments);
-        };
+        });
         if (BaseClass) {
             BaseConstructor.super$ = function () {
                 BaseClass.apply(this, arguments);
             }
         }
     } else {
-        BaseConstructor = function () {
-        };
+        BaseConstructor = createIdentifiableFunction(ref, function () {
+        });
     }
 
     if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {

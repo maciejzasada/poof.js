@@ -336,6 +336,9 @@
         var TestClass = class$('TestClass', {type$: class$.PUBLIC, extends$: null, implements$: []}, {
             static$: {
                 public$: {
+                    TestClass: function () {
+                        equal(this.privateMethod(), 'privateMethod');
+                    },
                     publicVar: 'public',
                     publicMethod: function () {
                         return TestClass.privateVar;
@@ -345,7 +348,10 @@
                     protectedVar: 'protected'
                 },
                 private$: {
-                    privateVar: 'private'
+                    privateVar: 'private',
+                    privateMethod: function () {
+                        return 'privateMethod';
+                    }
                 }
             },
             instance$: {
