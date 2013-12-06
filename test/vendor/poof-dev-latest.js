@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.6
- * @date 2013/12/06 08:33:30
+ * @version 0.4.7
+ * @date 2013/12/06 09:02:08
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -67,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('6', 10);
+    return parseInt('7', 10);
 });
 
 
@@ -525,17 +525,17 @@ defineClass = function (id, ref, name, meta, definition) {
 
     // Define constructor.
     if (definition.instance$ && definition.instance$.public$ && definition.instance$.public$[name]) {
-        BaseConstructor = createIdentifiableFunction(ref, function () {
+        BaseConstructor = function () {
             definition.instance$.public$[name].apply(this, arguments);
-        });
+        };
         if (BaseClass) {
             BaseConstructor.super$ = function () {
                 BaseClass.apply(this, arguments);
             }
         }
     } else {
-        BaseConstructor = createIdentifiableFunction(ref, function () {
-        });
+        BaseConstructor = function () {
+        };
     }
 
     if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {
@@ -589,7 +589,7 @@ defineClass = function (id, ref, name, meta, definition) {
     ref.onReady$ = importUtils.generateOnReadyHandler(ref);
 
     // Override the temporary constructor that was created earlier.
-    constructorsById[id] = Constructor;
+    constructorsById[id] = createIdentifiableFunction(ref.prototype, Constructor);
     
     // In case we were being loaded.
     if (currentLoadPath) {
@@ -615,8 +615,6 @@ class$ = function (name, meta, definition) {
         ref,
         dependencies,
         i;
-        
-    console.log('-- class');
 
     // Check if class name has been specified.
     if (typeof name !== 'string' || name.length === 0) {
@@ -808,19 +806,15 @@ importUtils = {
         switch (this.guessResourceType(path)) {
 
             case 'class':
-                console.log('* class');
                 return this.createClassReference(path);
 
             case 'script':
-                console.log('* script');
                 break;
 
             case 'image':
-                console.log('* image');
                 break;
 
             case 'other':
-                console.log('* other');
                 return {};
 
         }
@@ -904,7 +898,6 @@ importUtils = {
             throw new Error('This should never happen');
         } else {
             for (i = 0; i < dependencies.length; ++i) {
-                console.log('- Waiting for dependency', dependencies[i]);
                 dependencies[i].onReady$(onDependendyLoaded);
             }
         }
@@ -918,8 +911,6 @@ importUtils = {
         if (ref.ready$) {
             return;
         }
-        
-        console.log('[READY]', ref);
         
         if (currentLoadPath) {
             importUtils.constructorsByPath[currentLoadPath] = function () {};
@@ -958,11 +949,9 @@ importUtils = {
 
             case 'class':
                 var url = path.replace(/\./g, '/') + '.js';
-                console.log('loading class', url);
                 this.xhr(url, callback);
                 break;
             case 'script':
-                console.log('loading script', path);
                 break;
 
             case 'image':

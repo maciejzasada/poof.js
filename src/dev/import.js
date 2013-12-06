@@ -51,19 +51,15 @@ importUtils = {
         switch (this.guessResourceType(path)) {
 
             case 'class':
-                console.log('* class');
                 return this.createClassReference(path);
 
             case 'script':
-                console.log('* script');
                 break;
 
             case 'image':
-                console.log('* image');
                 break;
 
             case 'other':
-                console.log('* other');
                 return {};
 
         }
@@ -147,7 +143,6 @@ importUtils = {
             throw new Error('This should never happen');
         } else {
             for (i = 0; i < dependencies.length; ++i) {
-                console.log('- Waiting for dependency', dependencies[i]);
                 dependencies[i].onReady$(onDependendyLoaded);
             }
         }
@@ -161,8 +156,6 @@ importUtils = {
         if (ref.ready$) {
             return;
         }
-        
-        console.log('[READY]', ref);
         
         if (currentLoadPath) {
             importUtils.constructorsByPath[currentLoadPath] = function () {};
@@ -201,11 +194,9 @@ importUtils = {
 
             case 'class':
                 var url = path.replace(/\./g, '/') + '.js';
-                console.log('loading class', url);
                 this.xhr(url, callback);
                 break;
             case 'script':
-                console.log('loading script', path);
                 break;
 
             case 'image':

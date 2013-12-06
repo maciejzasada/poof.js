@@ -353,17 +353,17 @@ defineClass = function (id, ref, name, meta, definition) {
 
     // Define constructor.
     if (definition.instance$ && definition.instance$.public$ && definition.instance$.public$[name]) {
-        BaseConstructor = createIdentifiableFunction(ref, function () {
+        BaseConstructor = function () {
             definition.instance$.public$[name].apply(this, arguments);
-        });
+        };
         if (BaseClass) {
             BaseConstructor.super$ = function () {
                 BaseClass.apply(this, arguments);
             }
         }
     } else {
-        BaseConstructor = createIdentifiableFunction(ref, function () {
-        });
+        BaseConstructor = function () {
+        };
     }
 
     if (!meta.type$ || meta.type$ === class$.PUBLIC || meta.type$ === (class$.PUBLIC | class$.FINAL)) {
@@ -417,7 +417,7 @@ defineClass = function (id, ref, name, meta, definition) {
     ref.onReady$ = importUtils.generateOnReadyHandler(ref);
 
     // Override the temporary constructor that was created earlier.
-    constructorsById[id] = Constructor;
+    constructorsById[id] = createIdentifiableFunction(ref.prototype, Constructor);
     
     // In case we were being loaded.
     if (currentLoadPath) {
@@ -443,8 +443,6 @@ class$ = function (name, meta, definition) {
         ref,
         dependencies,
         i;
-        
-    console.log('-- class');
 
     // Check if class name has been specified.
     if (typeof name !== 'string' || name.length === 0) {
