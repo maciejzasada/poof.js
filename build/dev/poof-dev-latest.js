@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.7
- * @date 2013/12/06 09:02:08
+ * @version 0.4.9
+ * @date 2013/12/06 09:35:42
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -67,7 +67,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('7', 10);
+    return parseInt('9', 10);
 });
 
 
@@ -209,10 +209,10 @@ var STATIC = 1,
         ERROR_OVERRIDE_PROPERTY: 'Illegal attempt to override property {prop} by class {name}. Only methods can be overridden.',
         ERROR_OVERRIDE_STATIC: 'Illegal attempt to override a static property by class {name}',
         ERROR_PROPERTY_REDEFINE: 'Illegal attempt to redefine property {prop} by class {name}. Property already defined in the base class.',
-        ERROR_ACCESSIBILITY_1_2: 'Illegal attempt to access protected property {prop} from outside {name}\'s inheritance chain',
-        ERROR_ACCESSIBILITY_1_3: 'Illegal attempt to access private property {prop} from outside class {name}',
-        ERROR_ACCESSIBILITY_2_2: 'Illegal attempt to access protected static property {prop} from outside {name}\'s inheritance chain',
-        ERROR_ACCESSIBILITY_2_3: 'Illegal attempt to access private static property {prop} from outside class {name}',
+        ERROR_ACCESSIBILITY_1_2: 'Illegal attempt to access protected static property {prop} from outside {name}\'s inheritance chain',
+        ERROR_ACCESSIBILITY_1_3: 'Illegal attempt to access private static property {prop} from outside class {name}',
+        ERROR_ACCESSIBILITY_2_2: 'Illegal attempt to access protected property {prop} from outside {name}\'s inheritance chain',
+        ERROR_ACCESSIBILITY_2_3: 'Illegal attempt to access private property {prop} from outside class {name}',
         ERROR_CONSTANT_MODIFICATION: 'Illegal attempt to modify constant property {prop} on class {name}',
         ERROR_CONSTANT_METHOD: 'Function cannot be constant. Evaluating definition of {prop} in definition of class {class}',
         ERROR_EXTEND_FINAL: 'Invalid attempt to extend a final class {base} by class {name}',
@@ -304,7 +304,7 @@ isInScope = function (ref, scope) {
  * @param value
  * @param accessibility
  */
-createAccessibleProperty = function (ref, prop, value, accessibility, scope, constant) {
+createAccessibleProperty = function (ref, name, prop, value, accessibility, scope, constant) {
     switch (accessibility) {
     case PUBLIC:
         if (constant) {
@@ -386,7 +386,7 @@ transcribeProperty = function (ref, name, prop, value, accessibility, scope, ove
             throw new Error(STRINGS.ERROR_CONSTANT_METHOD.replace('{prop}', prop).replace('{name}', name));
         }
         // Create the constant property with accessibility restrictions.
-        createAccessibleProperty(ref, prop, value, accessibility, scope, true);
+        createAccessibleProperty(ref, name, prop, value, accessibility, scope, true);
     } else {
         // Not a constant.
         if (typeof value === 'function') {
@@ -398,7 +398,7 @@ transcribeProperty = function (ref, name, prop, value, accessibility, scope, ove
                     // Save a reference to the base class implementation before it's overridden.
                     var baseMethod = ref[prop];
                     // Create the new method using identifiable scope wrapper with accessibility restrictions.
-                    createAccessibleProperty(ref, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
+                    createAccessibleProperty(ref, name, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
                     // Create a super$ property on the overridden method.
                     ref[prop].super$ = function () {
                         return baseMethod.apply(this, arguments);
@@ -409,11 +409,11 @@ transcribeProperty = function (ref, name, prop, value, accessibility, scope, ove
                 }
             } else {
                 // Create the method using identifiable scope wrapper with accessibility restrictions.
-                createAccessibleProperty(ref, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
+                createAccessibleProperty(ref, name, prop, createIdentifiableFunction(ref, value), accessibility, scope, false);
             }
         } else {
             // Create the variable property with accessibility restrictions.
-            createAccessibleProperty(ref, prop, value, accessibility, scope, false);
+            createAccessibleProperty(ref, name, prop, value, accessibility, scope, false);
         }
     }
 
