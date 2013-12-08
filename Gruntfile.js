@@ -8,9 +8,10 @@ module.exports = function (grunt) {
     'use strict';
 
     var NAME = 'poof.js',
+        VERSION_TYPE = 'Alpha',
         VERSION = 0,
         REVISION = 4,
-        BUILD = 10,
+        BUILD = 11,
         VERSION_STRING = VERSION + '.' + REVISION + '.' + BUILD,
         AUTHOR = 'Maciej Zasada hello@maciejzasada.com',
         COPYRIGHT = '2013 Maciej Zasada',
@@ -98,7 +99,7 @@ module.exports = function (grunt) {
                     '\n * @date ' + '<%= grunt.template.today("yyyy/mm/dd HH:MM:ss") %>' +
                     '\n */\n\n',
                 process: function (src, filepath) {
-                    return '/* ---------- Source: ' + filepath + ' ---------- */\n\n' + src.replace(/\{\{VERSION\}\}/g, VERSION).replace(/\{\{REVISION\}\}/g, REVISION).replace(/\{\{BUILD\}\}/g, BUILD);
+                    return '/* ---------- Source: ' + filepath + ' ---------- */\n\n' + src.replace(/\{\{VERSION_TYPE\}\}/g, VERSION_TYPE).replace(/\{\{VERSION\}\}/g, VERSION).replace(/\{\{REVISION\}\}/g, REVISION).replace(/\{\{BUILD\}\}/g, BUILD);
                 }
             },
             devVersion: {
