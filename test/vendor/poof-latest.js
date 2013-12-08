@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.10
- * @date 2013/12/08 08:27:45
+ * @version 0.4.11
+ * @date 2013/12/08 08:30:57
  */
 
 /* ---------- Source: src/prod/poof.js ---------- */
@@ -22,12 +22,8 @@
  */
 var module = module || {},
     window = window || {},
-    document = document || {},
-    navigator = navigator || {},
     poof,
-    CONFIG,
-    domReady,
-    initApp;
+    CONFIG;
 
 
 /**
@@ -36,11 +32,20 @@ var module = module || {},
  */
 module.exports = typeof global === 'undefined' ? (window || {}) : global;
 
+
 /**
  * poof object
  * @type {{}}
  */
 poof = {};
+
+/**
+ * Version type,
+ * replaced with actual value during build.
+ */
+poof.__defineGetter__('VERSION_TYPE', function () {
+    return 'Alpha';
+});
 
 
 /**
@@ -66,7 +71,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('10', 10);
+    return parseInt('11', 10);
 });
 
 
@@ -74,89 +79,7 @@ poof.__defineGetter__('BUILD', function () {
  * Version string
  */
 poof.__defineGetter__('VERSION_STRING', function () {
-    return poof.VERSION + '.' + poof.REVISION + '.' + poof.BUILD;
-});
-
-
-/**
- * Internal poof configuration
- * @type {{}}
- */
-CONFIG = {
-    MAIN_CLASS_ATTRIBUTE_NAME: 'data-main',
-    CLASS_EXTENSION: '.poof',
-    ROOT: ''
-};
-
-
-/**
- * Sets callback for when DOM is ready
- * @param callback
- */
-domReady = function (callback) {
-    if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', callback, false);
-    } else if (/KHTML|WebKit|iCab/i.test(navigator.userAgent)) {
-        var domReadyIntervalId = setInterval(function () {
-            if (/loaded|complete/i.test(document.readyState)) {
-                callback();
-                clearInterval(domReadyIntervalId);
-            }
-        }, 10);
-    } else {
-        window.onload = callback;
-    }
-};
-
-
-/**
- * Initialises the application from main class
- */
-initApp = function () {
-    var scripts = document.getElementsByTagName('script'),
-        i,
-        mainPath,
-        Main;
-
-    // Iterate over included scripts to find the main poof.js script.
-    for (i = 0; i < scripts.length; ++i) {
-
-        // Check if the script has an attribute specifying the main poof.js class.
-        if (scripts[i].hasAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME)) {
-
-            // Get the attribute value which is the path to the main class.
-            mainPath = scripts[i].getAttribute(CONFIG.MAIN_CLASS_ATTRIBUTE_NAME);
-
-            // Check if the file specified as a main class has appropriate extension.
-            if (mainPath.match(CONFIG.CLASS_EXTENSION + '$')) {
-
-                // Resolve root package URL.
-                CONFIG.ROOT = mainPath.indexOf('/') === -1 ? '' : mainPath.substring(0, mainPath.lastIndexOf('/') + 1);
-
-                // Initialise the main class (it is reference-less).
-                Main = import$(mainPath, function () {
-                    new Main();
-                });
-
-                return true;
-
-            }
-
-        }
-
-    }
-
-    return false;
-};
-
-
-/**
- * Initialise the application when DOM is ready
- */
-domReady(function () {
-    if (!initApp()) {
-        console.warn('poof.js main class not found');
-    }
+    return poof.VERSION_TYPE + ' ' + poof.VERSION + '.' + poof.REVISION + '.' + poof.BUILD;
 });
 
 
@@ -165,7 +88,6 @@ domReady(function () {
  * @type {{}}
  */
 module.exports.poof = poof;
-
 
 /* ---------- Source: src/prod/class.js ---------- */
 
