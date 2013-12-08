@@ -2,8 +2,8 @@
  * poof.js
  * @author Maciej Zasada hello@maciejzasada.com
  * @copyright 2013 Maciej Zasada
- * @version 0.4.11
- * @date 2013/12/08 08:30:57
+ * @version 0.4.12
+ * @date 2013/12/08 15:31:51
  */
 
 /* ---------- Source: src/dev/poof.js ---------- */
@@ -71,7 +71,7 @@ poof.__defineGetter__('REVISION', function () {
  * replaced with actual value during build.
  */
 poof.__defineGetter__('BUILD', function () {
-    return parseInt('11', 10);
+    return parseInt('12', 10);
 });
 
 
@@ -152,6 +152,7 @@ var STATIC = 1,
     refIdSeed = 1,
     constructorsById,
     duringSingletonInstantiation = false,
+    duringExtension = false,
     callStack = [],
     isInProtectedScope,
     isInPrivateScope,
@@ -405,7 +406,9 @@ defineClass = function (id, ref, name, meta, definition) {
                 throw new Error(STRINGS.ERROR_EXTEND_FINAL.replace('{base}', BaseClass.name$).replace('{name}', name));
             }
             try {
+                duringExtension = true;
                 ref.prototype = new BaseClass();
+                duringExtension = false;
             } catch (e) {
                 throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name) + e.toString() + '\n' + e.stack);
             }
@@ -469,7 +472,9 @@ defineClass = function (id, ref, name, meta, definition) {
     } else if (meta.type$ === class$.ABSTRACT) {
 
         Constructor = function () {
-            throw new Error(STRINGS.ERROR_INSTANTIATION_DIRECT_ABSTRACT.replace('{name}', name));
+            if (!duringExtension) {
+                throw new Error(STRINGS.ERROR_INSTANTIATION_DIRECT_ABSTRACT.replace('{name}', name));
+            }
         };
 
     } else if (meta.type$ === class$.SINGLETON || meta.type$ === (class$.SINGLETON | class$.FINAL)) {

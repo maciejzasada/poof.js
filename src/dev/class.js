@@ -58,6 +58,7 @@ var STATIC = 1,
     refIdSeed = 1,
     constructorsById,
     duringSingletonInstantiation = false,
+    duringExtension = false,
     callStack = [],
     isInProtectedScope,
     isInPrivateScope,
@@ -311,7 +312,9 @@ defineClass = function (id, ref, name, meta, definition) {
                 throw new Error(STRINGS.ERROR_EXTEND_FINAL.replace('{base}', BaseClass.name$).replace('{name}', name));
             }
             try {
+                duringExtension = true;
                 ref.prototype = new BaseClass();
+                duringExtension = false;
             } catch (e) {
                 throw new Error(STRINGS.ERROR_EXTEND_CONSTRUCTOR_EXCEPTION.replace('{name}', name) + e.toString() + '\n' + e.stack);
             }
@@ -375,7 +378,9 @@ defineClass = function (id, ref, name, meta, definition) {
     } else if (meta.type$ === class$.ABSTRACT) {
 
         Constructor = function () {
-            throw new Error(STRINGS.ERROR_INSTANTIATION_DIRECT_ABSTRACT.replace('{name}', name));
+            if (!duringExtension) {
+                throw new Error(STRINGS.ERROR_INSTANTIATION_DIRECT_ABSTRACT.replace('{name}', name));
+            }
         };
 
     } else if (meta.type$ === class$.SINGLETON || meta.type$ === (class$.SINGLETON | class$.FINAL)) {
