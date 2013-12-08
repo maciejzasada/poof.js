@@ -31,41 +31,7 @@ importUtils = {
         return this.resourcesByPath[path];
 
     },
-    
-    guessResourceType: function (path) {
 
-        if (!!path.match('\\.[A-Z]+.*$')) {
-            return 'class';
-        } else if (!!path.match('.+\\.js$')) {
-            return 'script';
-        } else if (!!path.match('.+\\.[jpg|jpeg|png]$')) {
-            return 'image';
-        } else {
-            return 'other';
-        }
-
-    },
-
-    createReference: function (path) {
-
-        switch (this.guessResourceType(path)) {
-
-            case 'class':
-                return this.createClassReference(path);
-
-            case 'script':
-                break;
-
-            case 'image':
-                break;
-
-            case 'other':
-                return {};
-
-        }
-
-    },
-    
     createClassReference: function (path) {
 
         var ref,
@@ -189,24 +155,10 @@ importUtils = {
     },
 
     load: function (path, callback) {
-
-        switch (this.guessResourceType(path)) {
-
-            case 'class':
-                var url = path.replace(/\./g, '/') + '.js';
-                this.xhr(url, callback);
-                break;
-            case 'script':
-                break;
-
-            case 'image':
-                break;
-
-            case 'other':
-                break;
-
+        if (path.indexOf('/') === -1) {
+            path = path.replace(/\./g, '/') + '.js';
         }
-
+        this.xhr(path, callback);
     },
     
     xhr: function (url, callback) {
@@ -250,6 +202,7 @@ importUtils = {
                 if (typeof resource.callback === 'function') {
                     resource.callback();
                 }
+                importUtils.importNext();
             };
 
             this.load(resource.path, callback);
@@ -268,17 +221,14 @@ importUtils = {
  */
 import$ = function (path, callback) {
 
+    console.log('import', path);
     var ref = importUtils.getResourceReference(path);
 
     // Check whether this resource has already been imported. If yes, simply return a reference to it.
-    if (ref) {
-
-        // TODO: check if it is imported and if yes, invoke the callback
-
-    } else {
+    if (!ref) {
 
         // Create a temporary reference to the imported resource.
-        ref = importUtils.createReference(path);
+        ref = importUtils.createClassReference(path);
 
         // Add the path to import queue.
         importUtils.add(path, ref, callback);
