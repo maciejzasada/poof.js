@@ -907,15 +907,10 @@
         module('Dependency imports');
 
         var DependencyClass = import$('dependencies.DependencyClass'),
-            DependencyClass2 = import$('http://jsfiddle.net/echo/js/?js=define(function%20()%20%7B%0A%20%20%20%20var%20DependencyClass2%20%3D%20class%24(%27DependencyClass2%27%2C%20%7Btype%24%3A%20class%24.PUBLIC%7D%2C%20%7B%0A%20%20%20%20%0A%20%20%20%20%20%20%20%20instance%24%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20%20%20public%24%3A%20%7B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20test%3A%20function%20()%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20log(%27I%20belong%20to%20DependencyClass2%27)%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%0A%20%20%20%20%7D)%3B%0A%0A%20%20%20%20return%20DependencyClass2%3B%0A%7D)%3B'),
             TestClass,
-            TestClass2,
             instance;
 
         TestClass = class$('TestClass', {type$: class$.PUBLIC, extends$: DependencyClass, implements$: []}, {
-        });
-        
-        TestClass2 = class$('TestClass2', {type$: class$.PUBLIC, extends$: DependencyClass2, implements$: []}, {
         });
 
         asyncTest('extended from an imported dependency class', function () {
@@ -923,15 +918,6 @@
             TestClass.onReady$(function () {
                 instance = new TestClass();
                 equal(instance.testMethod(), 'test');
-                start();
-            });
-        });
-        
-        asyncTest('extended from a dependency class imported via full URL', function () {
-            expect(1);
-            TestClass2.onReady$(function () {
-                instance = new TestClass2();
-                equal(instance.test(), 'I belong to DependencyClass2');
                 start();
             });
         });
