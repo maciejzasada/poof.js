@@ -173,8 +173,8 @@ Import dependency classes and interfaces.
 **WIP. We recommend using RequireJS for now.**
 
 ### p.js optimizer
-Concatenates, minifies and optimises imported files into one.  
-**Soon available!**
+Concatenates, minifies and optimises modular POOF.js project.  
+[https://github.com/maciejzasada/p.js](https://github.com/maciejzasada/p.js)
 
 
 Examples
